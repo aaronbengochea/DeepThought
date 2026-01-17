@@ -48,10 +48,11 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Import and include routers here (will be added in Step 15)
-    # from deepthought.api.routes import health, tasks
-    # app.include_router(health.router, prefix="/health", tags=["health"])
-    # app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tasks"])
+    # Include routers
+    from deepthought.api.routes import health, tasks
+
+    app.include_router(health.router, prefix="/health", tags=["health"])
+    app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tasks"])
 
     return app
 
