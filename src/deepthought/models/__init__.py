@@ -11,8 +11,12 @@ from deepthought.models.agents import (
     VerificationResult,
     VerificationStatus,
 )
+from deepthought.models.database import CalculationItem, DynamoDBItem
+from deepthought.models.requests import TaskRequest
+from deepthought.models.responses import HealthResponse, TaskResponse
 
 __all__ = [
+    # Agent models
     "Plan",
     "PlanStep",
     "PlanStepType",
@@ -22,4 +26,11 @@ __all__ = [
     "VerificationCheck",
     "VerificationStatus",
     "FormattedResponse",
+    # Database models
+    "DynamoDBItem",
+    "CalculationItem",
+    # Request/Response models
+    "TaskRequest",
+    "TaskResponse",
+    "HealthResponse",
 ]
