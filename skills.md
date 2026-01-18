@@ -1,1 +1,0 @@
-# Skills template for Claude Agent
