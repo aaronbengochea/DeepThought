@@ -186,20 +186,26 @@ DeepThought/
 - [x] Create tests/integration/__init__.py
 - **Commit**: `"Add test infrastructure and fixtures"`
 
+#### Step 18: Write unit tests
+- [x] Create tests/unit/test_math_ops.py (test add_values tool)
+- [x] Create tests/unit/test_models.py (test Pydantic models)
+- [x] Create tests/unit/test_nodes.py (test agent nodes with mock state)
+- **Commit**: `"Add unit tests for tools, models, and agent nodes"`
+
 ---
 
 ### Remaining Steps 🔲
 
-#### Step 18: Write unit tests
-- [ ] Create tests/unit/test_math_ops.py (test add_values tool)
-- [ ] Create tests/unit/test_models.py (test Pydantic models)
-- [ ] Create tests/unit/test_nodes.py (test agent nodes with mock state)
+#### Step 19: Fix LangGraph import compatibility
+- [ ] Update langgraph import in tasks.py (`langgraph.graph.graph` → correct module path)
+- [ ] Verify imports work with installed langgraph version
+- [ ] Run unit tests to confirm fix
 
-#### Step 19: Write integration tests
+#### Step 20: Write integration tests
 - [ ] Create tests/integration/test_graph.py (test full graph execution)
 - [ ] Create tests/integration/test_api.py (test FastAPI endpoints)
 
-#### Step 20: Manual end-to-end testing
+#### Step 21: Manual end-to-end testing
 - [ ] Run full manual test flow (see Manual Testing Guide below)
 - [ ] Verify all components work together
 
