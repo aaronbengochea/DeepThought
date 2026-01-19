@@ -3,7 +3,7 @@
 from functools import lru_cache
 from typing import Generator
 
-from langgraph.graph.graph import CompiledGraph
+from langgraph.graph.state import CompiledStateGraph
 
 from deepthought.agents import compile_graph
 from deepthought.config import get_settings
@@ -11,7 +11,7 @@ from deepthought.db import DynamoDBClient
 
 
 @lru_cache
-def get_agent_graph() -> CompiledGraph:
+def get_agent_graph() -> CompiledStateGraph:
     """Get the compiled LangGraph agent graph (singleton)."""
     return compile_graph()
 

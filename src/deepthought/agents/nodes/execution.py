@@ -36,11 +36,13 @@ async def execution_node(state: AgentState) -> dict[str, Any]:
         }
 
     tool_results: list[ToolCallResult] = []
+    executed_steps: list[int] = []
     db_item: dict[str, Any] | None = None
     final_value: int | float | None = None
 
     for step in plan.steps:
         if step.step_type == PlanStepType.QUERY_DATABASE:
+            executed_steps.append(step.step_number)
             # Execute DynamoDB query
             start_time = time.perf_counter()
             try:
@@ -75,6 +77,7 @@ async def execution_node(state: AgentState) -> dict[str, Any]:
 
         elif step.step_type == PlanStepType.EXECUTE_FUNCTION:
             if step.parameters.get("function") == "add_values" and db_item:
+                executed_steps.append(step.step_number)
                 start_time = time.perf_counter()
                 try:
                     val1 = db_item.get("val1")
@@ -111,7 +114,7 @@ async def execution_node(state: AgentState) -> dict[str, Any]:
 
     execution_result = ExecutionResult(
         plan_id=plan.plan_id,
-        executed_steps=[tr.tool_name for tr in tool_results],  # type: ignore[misc]
+        executed_steps=executed_steps,
         tool_results=tool_results,
         final_value=final_value,
         success=all(tr.success for tr in tool_results),

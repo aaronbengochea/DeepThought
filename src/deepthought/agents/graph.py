@@ -1,7 +1,7 @@
 """LangGraph StateGraph definition for the multi-agent system."""
 
 from langgraph.graph import END, START, StateGraph
-from langgraph.graph.graph import CompiledGraph
+from langgraph.graph.state import CompiledStateGraph
 
 from deepthought.agents.edges.routing import (
     route_after_execution,
@@ -101,7 +101,7 @@ def create_agent_graph() -> StateGraph[AgentState]:
     return builder
 
 
-def compile_graph() -> CompiledGraph:
+def compile_graph() -> CompiledStateGraph:
     """
     Compile the graph for execution.
 

@@ -4,7 +4,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from langgraph.graph.graph import CompiledGraph
+from langgraph.graph.state import CompiledStateGraph
 
 from deepthought.api.dependencies import get_agent_graph
 from deepthought.models import TaskRequest, TaskResponse
@@ -21,7 +21,7 @@ router = APIRouter()
 )
 async def execute_calculation_task(
     request: TaskRequest,
-    graph: CompiledGraph = Depends(get_agent_graph),
+    graph: CompiledStateGraph = Depends(get_agent_graph),
 ) -> TaskResponse:
     """
     Execute a calculation task through the multi-agent pipeline.
