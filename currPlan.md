@@ -208,6 +208,8 @@ DeepThought/
 #### Step 19.b: Incorporate open source LLMs via OLamma or OpenLLM
 - [ ] Use Llama, Mini-max, Deepseak, etc..
 
+#### Step 19.c: Perform testing on open source LLMs 
+
 #### Step 20: Write integration tests
 - [ ] Create tests/integration/test_graph.py (test full graph execution)
 - [ ] Create tests/integration/test_api.py (test FastAPI endpoints)
