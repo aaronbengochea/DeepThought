@@ -205,10 +205,86 @@ DeepThought/
 
 ### Remaining Steps 🔲
 
-#### Step 19.b: Incorporate open source LLMs via OLamma or OpenLLM
-- [ ] Use Llama, Mini-max, Deepseak, etc..
+#### Step 19.b: Refactor to True Agent Architecture with Ollama Support
 
-#### Step 19.c: Perform testing on open source LLMs 
+**Overview**: Current "agents" are deterministic workflow nodes without LLM reasoning. This step refactors to a proper agent architecture where each agent uses an LLM for reasoning and has access to specific tools for execution.
+
+**Architecture Change**:
+```
+BEFORE: Nodes with hardcoded logic (no LLM)
+AFTER:  Agents with LLM reasoning + Tools for execution
+```
+
+**Tool Definitions**:
+| Tool | Purpose | Used By |
+|------|---------|---------|
+| `query_dynamodb` | Fetch item from DB by pk/sk | Execution Agent |
+| `add_values` | Add two numbers | Execution Agent |
+| `multiply_values` | Multiply two numbers | Execution Agent |
+| `divide_values` | Divide two numbers | Execution Agent |
+| `verify_addition` | Check val1 + val2 == result | Verification Agent |
+| `verify_multiplication` | Check val1 * val2 == result | Verification Agent |
+| `verify_division` | Check val1 / val2 == result | Verification Agent |
+| `format_json` | Structure response data | Response Agent |
+
+##### Phase 19.b.1: LLM Provider Abstraction
+- [ ] Add `langchain-ollama` to pyproject.toml
+- [ ] Create `src/deepthought/llm/__init__.py`
+- [ ] Create `src/deepthought/llm/provider.py` (factory for Ollama/Anthropic)
+- [ ] Update `src/deepthought/config/settings.py` with LLM config
+- [ ] Update `.env.example` with new LLM settings
+- **Commit**: `"Add LLM provider abstraction with Ollama support"`
+
+##### Phase 19.b.2: Infrastructure Setup
+- [ ] Add Ollama service to `docker-compose.yml`
+- [ ] Create `scripts/setup_ollama.py` (pull required models)
+- **Commit**: `"Add Ollama to Docker infrastructure"`
+
+##### Phase 19.b.3: Refactor Tools Layer
+- [ ] Create `src/deepthought/tools/database.py` (rename from dynamodb.py)
+- [ ] Update `src/deepthought/tools/math_ops.py` (add multiply, divide)
+- [ ] Create `src/deepthought/tools/verification.py` (verify_addition, verify_multiplication, verify_division)
+- [ ] Create `src/deepthought/tools/formatting.py` (format_json)
+- [ ] Update `src/deepthought/tools/__init__.py` (export all tools)
+- **Commit**: `"Refactor and expand tools layer"`
+
+##### Phase 19.b.4: Create Agent Prompts
+- [ ] Create `src/deepthought/agents/prompts/__init__.py`
+- [ ] Create `src/deepthought/agents/prompts/orchestrator.py`
+- [ ] Create `src/deepthought/agents/prompts/execution.py`
+- [ ] Create `src/deepthought/agents/prompts/verification.py`
+- [ ] Create `src/deepthought/agents/prompts/response.py`
+- **Commit**: `"Add agent system prompts"`
+
+##### Phase 19.b.5: Refactor Agent Nodes
+- [ ] Refactor `orchestrator.py` - LLM generates plan dynamically
+- [ ] Refactor `execution.py` - LLM + tools [query_dynamodb, add_values, multiply_values, divide_values]
+- [ ] Refactor `verification.py` - LLM + tools [verify_addition, verify_multiplication, verify_division]
+- [ ] Refactor `response.py` - LLM + tools [format_json]
+- **Commit**: `"Refactor agent nodes to use LLM reasoning"`
+
+##### Phase 19.b.6: Update Tests
+- [ ] Create `tests/unit/test_llm_provider.py`
+- [ ] Create `tests/unit/test_tools.py` (test new tools)
+- [ ] Update `tests/unit/test_nodes.py` (mock LLM calls)
+- **Commit**: `"Update tests for new agent architecture"`
+
+##### Phase 19.b.7: Update Documentation
+- [ ] Update `manualTesting.md` with Ollama setup instructions
+- [ ] Update `.env.example` with complete settings
+- **Commit**: `"Update documentation for Ollama and new architecture"`
+
+##### Phase 19.b.8: Holistic Testing
+- [ ] Start Ollama and pull models
+- [ ] Run full test suite
+- [ ] Manual end-to-end testing with all operations (add, multiply, divide)
+- **Commit**: `"Complete Step 19.b - True agent architecture with Ollama"`
+
+#### Step 19.c: Perform testing on open source LLMs
+- [ ] Test with Llama 3.2
+- [ ] Test with Mistral
+- [ ] Test with DeepSeek
+- [ ] Document performance/quality differences
 
 #### Step 20: Write integration tests
 - [ ] Create tests/integration/test_graph.py (test full graph execution)
@@ -228,7 +304,7 @@ Follow these steps to manually test the DeepThought backend:
 
 - Docker installed and running
 - Python 3.11+
-- An Anthropic API key
+- Ollama (for open source models) OR Anthropic API key
 
 ### Step 1: Clone and Navigate to Project
 
