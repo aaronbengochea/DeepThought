@@ -1,4 +1,4 @@
-"""DynamoDB tools for agents."""
+"""Database tools for agents."""
 
 from typing import Any
 
