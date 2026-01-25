@@ -28,6 +28,13 @@ class Settings(BaseSettings):
     dynamodb_table_name: str = "deepthought-calculations"
     dynamodb_endpoint_url: str | None = None  # For local DynamoDB
 
+    # LLM Configuration
+    llm_provider: str = "ollama"  # "ollama" or "anthropic"
+    llm_model: str = "llama3.2"  # Model name (e.g., "llama3.2", "mistral", "claude-3-haiku-20240307")
+
+    # Ollama
+    ollama_base_url: str = "http://localhost:11434"
+
     # Anthropic
     anthropic_api_key: str = ""
 
