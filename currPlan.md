@@ -281,6 +281,14 @@ AFTER:  Agents with LLM reasoning + Tools for execution
 - [x] Verify agent graph compiles successfully
 - **Note**: Manual end-to-end testing requires starting Ollama/DynamoDB services
 
+##### Phase 19.b.9: Add support for paid cloud LLM APIs listed in .env.example
+- [ ] OpenAI
+- [ ] Google Gemini
+- [ ] Cohere
+- [ ] Groq
+- [ ] TogetherAI
+- [ ] FireworksAI
+
 #### Step 19.c: Perform testing on open source LLMs
 - [ ] Test with Llama 3.2
 - [ ] Test with Mistral
