@@ -289,6 +289,8 @@ AFTER:  Agents with LLM reasoning + Tools for execution
 - [ ] TogetherAI
 - [ ] FireworksAI
 
+##### Phase 19.b.20: Look up documentation for all paid clould LLM APIs and document it for future users
+
 #### Step 19.c: Perform testing on open source LLMs
 - [ ] Test with Llama 3.2
 - [ ] Test with Mistral
