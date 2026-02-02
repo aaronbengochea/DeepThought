@@ -281,27 +281,42 @@ AFTER:  Agents with LLM reasoning + Tools for execution
 - [x] Verify agent graph compiles successfully
 - **Note**: Manual end-to-end testing requires starting Ollama/DynamoDB services
 
-##### Phase 19.b.9: Add support for paid cloud LLM APIs listed in .env.example
+##### Phase 19.b.9: Add Google Gemini Support ✅
+- [x] Add `langchain-google-genai` dependency to pyproject.toml
+- [x] Update `src/deepthought/llm/provider.py` with Google Gemini provider
+- [x] Update `src/deepthought/config/settings.py` with `google_api_key`
+- [x] Update `.env.example` with Google provider documentation
+- [x] Fix DynamoDB docker-compose to use bind mount for reliable macOS persistence
+- **Commit**: `"Add Google Gemini LLM provider support"`
+
+---
+
+## Future Implementation
+
+The following steps are planned for future development:
+
+#### 1. Performance Testing with Open Source LLMs
+- [ ] Test with Llama 3.2
+- [ ] Test with Mistral
+- [ ] Test with DeepSeek
+- [ ] Document performance/quality differences between models
+
+#### 2. Add Support for Additional Cloud LLM APIs
 - [ ] OpenAI
-- [ ] Google Gemini
 - [ ] Cohere
 - [ ] Groq
 - [ ] TogetherAI
 - [ ] FireworksAI
 
-##### Phase 19.b.20: Look up documentation for all paid clould LLM APIs and document it for future users
+#### 3. Cloud LLM API Documentation
+- [ ] Research and document API usage for all supported cloud LLM providers
+- [ ] Create setup guides for future users
 
-#### Step 19.c: Perform testing on open source LLMs
-- [ ] Test with Llama 3.2
-- [ ] Test with Mistral
-- [ ] Test with DeepSeek
-- [ ] Document performance/quality differences
-
-#### Step 20: Write integration tests
+#### 4. Integration Tests
 - [ ] Create tests/integration/test_graph.py (test full graph execution)
 - [ ] Create tests/integration/test_api.py (test FastAPI endpoints)
 
-#### Step 21: Manual end-to-end testing
+#### 5. Manual End-to-End Testing
 - [ ] Run full manual test flow (see Manual Testing Guide below)
 - [ ] Verify all components work together
 
