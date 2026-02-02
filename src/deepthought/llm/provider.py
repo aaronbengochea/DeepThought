@@ -1,4 +1,4 @@
-"""LLM provider factory for switching between Ollama and Anthropic."""
+"""LLM provider factory for switching between Ollama, Anthropic, and Google Gemini."""
 
 from enum import Enum
 from functools import lru_cache
@@ -14,6 +14,7 @@ class LLMProvider(str, Enum):
 
     OLLAMA = "ollama"
     ANTHROPIC = "anthropic"
+    GOOGLE = "google"
 
 
 def _create_ollama_llm(model: str, base_url: str, **kwargs: Any) -> BaseChatModel:
@@ -53,6 +54,27 @@ def _create_anthropic_llm(model: str, api_key: str, **kwargs: Any) -> BaseChatMo
     return ChatAnthropic(
         model=model,
         api_key=api_key,
+        temperature=kwargs.get("temperature", 0.0),
+        **kwargs,
+    )
+
+
+def _create_google_llm(model: str, api_key: str, **kwargs: Any) -> BaseChatModel:
+    """Create a Google Gemini LLM instance.
+
+    Args:
+        model: The Google model name (e.g., "gemini-1.5-flash", "gemini-1.5-pro").
+        api_key: The Google API key.
+        **kwargs: Additional arguments passed to ChatGoogleGenerativeAI.
+
+    Returns:
+        A ChatGoogleGenerativeAI instance.
+    """
+    from langchain_google_genai import ChatGoogleGenerativeAI
+
+    return ChatGoogleGenerativeAI(
+        model=model,
+        google_api_key=api_key,
         temperature=kwargs.get("temperature", 0.0),
         **kwargs,
     )
@@ -107,6 +129,17 @@ def get_llm(
         return _create_anthropic_llm(
             model=effective_model,
             api_key=settings.anthropic_api_key,
+        )
+
+    elif effective_provider == LLMProvider.GOOGLE:
+        if not settings.google_api_key:
+            raise ValueError(
+                "GOOGLE_API_KEY must be set when using Google provider"
+            )
+
+        return _create_google_llm(
+            model=effective_model,
+            api_key=settings.google_api_key,
         )
 
     else:
