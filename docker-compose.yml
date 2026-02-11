@@ -16,27 +16,5 @@ services:
       timeout: 5s
       retries: 3
 
-  ollama:
-    image: ollama/ollama:latest
-    container_name: deepthought-ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama-models:/root/.ollama
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:11434/ || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    # Uncomment below for GPU support (NVIDIA)
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: all
-    #           capabilities: [gpu]
-
 volumes:
   dynamodb-data:
-  ollama-models:

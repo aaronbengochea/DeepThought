@@ -9,8 +9,6 @@ dependencies = [
     "pydantic>=2.5.0",
     "pydantic-settings>=2.1.0",
     "langchain>=0.1.0",
-    "langchain-anthropic>=0.1.0",
-    "langchain-ollama>=0.1.0",
     "langchain-google-genai>=1.0.0",
     "langgraph>=0.0.40",
     "boto3>=1.34.0",
@@ -49,8 +47,6 @@ module = [
     "aioboto3.*",
     "langchain.*",
     "langchain_core.*",
-    "langchain_anthropic.*",
-    "langchain_ollama.*",
     "langchain_google_genai.*",
     "langgraph.*",
 ]

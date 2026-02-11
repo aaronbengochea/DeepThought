@@ -1,131 +1,69 @@
-"""Unit tests for LLM provider abstraction."""
+"""Unit tests for LLM provider."""
 
 from unittest.mock import patch, MagicMock
 
 import pytest
 
-from deepthought.llm.provider import LLMProvider, get_llm, get_llm_with_tools
-
-
-class TestLLMProvider:
-    """Tests for LLMProvider enum."""
-
-    def test_ollama_value(self):
-        """Test OLLAMA enum value."""
-        assert LLMProvider.OLLAMA.value == "ollama"
-
-    def test_anthropic_value(self):
-        """Test ANTHROPIC enum value."""
-        assert LLMProvider.ANTHROPIC.value == "anthropic"
-
-    def test_from_string(self):
-        """Test creating enum from string."""
-        assert LLMProvider("ollama") == LLMProvider.OLLAMA
-        assert LLMProvider("anthropic") == LLMProvider.ANTHROPIC
+from deepthought.llm.provider import get_llm, get_llm_with_tools
 
 
 class TestGetLLM:
     """Tests for get_llm factory function."""
 
     @patch("deepthought.llm.provider.get_settings")
-    @patch("deepthought.llm.provider._create_ollama_llm")
-    def test_creates_ollama_by_default(self, mock_create_ollama, mock_settings):
-        """Test default provider is Ollama."""
-        # Clear the cache
+    @patch("deepthought.llm.provider._create_google_llm")
+    def test_creates_google_llm(self, mock_create_google, mock_settings):
+        """Test Google Gemini LLM creation."""
         get_llm.cache_clear()
 
         mock_settings.return_value = MagicMock(
-            llm_provider="ollama",
-            llm_model="llama3.2",
-            ollama_base_url="http://localhost:11434",
-            anthropic_api_key="",
+            llm_model="gemini-2.0-flash",
+            google_api_key="test-google-key",
         )
         mock_llm = MagicMock()
-        mock_create_ollama.return_value = mock_llm
+        mock_create_google.return_value = mock_llm
 
         result = get_llm()
 
-        mock_create_ollama.assert_called_once_with(
-            model="llama3.2",
-            base_url="http://localhost:11434",
+        mock_create_google.assert_called_once_with(
+            model="gemini-2.0-flash",
+            api_key="test-google-key",
         )
         assert result == mock_llm
 
     @patch("deepthought.llm.provider.get_settings")
-    @patch("deepthought.llm.provider._create_anthropic_llm")
-    def test_creates_anthropic_when_configured(self, mock_create_anthropic, mock_settings):
-        """Test Anthropic provider when configured."""
+    @patch("deepthought.llm.provider._create_google_llm")
+    def test_override_model(self, mock_create_google, mock_settings):
+        """Test overriding model via parameter."""
         get_llm.cache_clear()
 
         mock_settings.return_value = MagicMock(
-            llm_provider="anthropic",
-            llm_model="claude-3-haiku-20240307",
-            ollama_base_url="http://localhost:11434",
-            anthropic_api_key="sk-test-key",
+            llm_model="gemini-2.0-flash",
+            google_api_key="test-google-key",
         )
         mock_llm = MagicMock()
-        mock_create_anthropic.return_value = mock_llm
+        mock_create_google.return_value = mock_llm
 
-        result = get_llm()
+        result = get_llm(model="gemini-1.5-pro")
 
-        mock_create_anthropic.assert_called_once_with(
-            model="claude-3-haiku-20240307",
-            api_key="sk-test-key",
+        mock_create_google.assert_called_once_with(
+            model="gemini-1.5-pro",
+            api_key="test-google-key",
         )
         assert result == mock_llm
 
     @patch("deepthought.llm.provider.get_settings")
-    def test_raises_error_for_missing_ollama_url(self, mock_settings):
-        """Test error when Ollama URL is missing."""
+    def test_raises_error_for_missing_google_key(self, mock_settings):
+        """Test error when Google API key is missing."""
         get_llm.cache_clear()
 
         mock_settings.return_value = MagicMock(
-            llm_provider="ollama",
-            llm_model="llama3.2",
-            ollama_base_url="",  # Missing
-            anthropic_api_key="",
+            llm_model="gemini-2.0-flash",
+            google_api_key="",
         )
 
-        with pytest.raises(ValueError, match="OLLAMA_BASE_URL"):
+        with pytest.raises(ValueError, match="GOOGLE_API_KEY"):
             get_llm()
-
-    @patch("deepthought.llm.provider.get_settings")
-    def test_raises_error_for_missing_anthropic_key(self, mock_settings):
-        """Test error when Anthropic API key is missing."""
-        get_llm.cache_clear()
-
-        mock_settings.return_value = MagicMock(
-            llm_provider="anthropic",
-            llm_model="claude-3-haiku-20240307",
-            ollama_base_url="http://localhost:11434",
-            anthropic_api_key="",  # Missing
-        )
-
-        with pytest.raises(ValueError, match="ANTHROPIC_API_KEY"):
-            get_llm()
-
-    @patch("deepthought.llm.provider.get_settings")
-    @patch("deepthought.llm.provider._create_ollama_llm")
-    def test_override_provider(self, mock_create_ollama, mock_settings):
-        """Test overriding provider via parameter."""
-        get_llm.cache_clear()
-
-        mock_settings.return_value = MagicMock(
-            llm_provider="anthropic",  # Default to Anthropic
-            llm_model="claude-3-haiku-20240307",
-            ollama_base_url="http://localhost:11434",
-            anthropic_api_key="sk-test-key",
-        )
-        mock_llm = MagicMock()
-        mock_create_ollama.return_value = mock_llm
-
-        # Override to Ollama
-        result = get_llm(provider=LLMProvider.OLLAMA, model="mistral")
-
-        mock_create_ollama.assert_called_once_with(
-            model="mistral",
-            base_url="http://localhost:11434",
-        )
 
 
 class TestGetLLMWithTools:
