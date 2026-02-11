@@ -15,6 +15,25 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    networks:
+      - sn-deepthought
 
-volumes:
-  dynamodb-data:
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin
+    container_name: deepthought-dynamodb-admin
+    ports:
+      - "8001:8001"
+    environment:
+      - DYNAMO_ENDPOINT=${DC_DYNAMO_ENDPOINT}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+    depends_on:
+      dynamodb-local:
+        condition: service_healthy
+    networks:
+      - sn-deepthought
+
+networks:
+  sn-deepthought:
+    driver: bridge
