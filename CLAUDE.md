@@ -52,7 +52,7 @@ Each node is an async function in `src/deepthought/agents/nodes/` that receives 
 - **`agents/`** — LangGraph graph definition, node implementations, routing edges, system prompts per agent
 - **`tools/`** — LangChain `@tool`-decorated functions: `database.py` (DynamoDB query), `math_ops.py` (add/multiply/divide), `verification.py`, `formatting.py`. Tool groups exported as `EXECUTION_TOOLS`, `VERIFICATION_TOOLS`, `RESPONSE_TOOLS`
 - **`models/`** — Pydantic v2 models for agents, database, requests, responses
-- **`llm/provider.py`** — Factory pattern returning `BaseChatModel` for Ollama, Anthropic, or Google Gemini based on `LLM_PROVIDER` env var
+- **`llm/provider.py`** — Factory pattern returning Google Gemini `BaseChatModel` via `LLM_MODEL` env var
 - **`db/client.py`** — Async DynamoDB wrapper using aioboto3
 - **`config/settings.py`** — Pydantic Settings with `.env` support, LRU-cached singleton
 
@@ -82,13 +82,15 @@ Each node is an async function in `src/deepthought/agents/nodes/` that receives 
 
 ## Environment Configuration
 
-Copy `.env.example` to `.env`. Key variables:
+Copy `.env.example` to `.env`. All variables are required (no hardcoded defaults):
 
-- `LLM_PROVIDER`: `ollama` | `anthropic` | `google` (default: `ollama`)
-- `LLM_MODEL`: model name per provider (default: `llama3.2`)
-- `DYNAMODB_ENDPOINT_URL`: set to `http://localhost:8000` for local dev
-- Provider API keys: `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`
+- `LLM_MODEL`: Google Gemini model name (e.g., `gemini-2.0-flash`)
+- `GOOGLE_API_KEY`: Google API key
+- `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`: AWS credentials
+- `DYNAMODB_ENDPOINT_URL`: DynamoDB endpoint (e.g., `http://localhost:8000`)
+- `DC_DYNAMO_ENDPOINT`: Docker-internal DynamoDB endpoint (e.g., `http://deepthought-dynamodb:8000`)
+- `CORS_ORIGINS`: Allowed CORS origins
 
 ## Docker Services
 
-`docker-compose.yml` provides DynamoDB Local (port 8000) and Ollama (port 11434).
+`docker-compose.yml` provides DynamoDB Local (port 8000) and DynamoDB Admin GUI (port 8001) on the `sn-deepthought` bridge network.
