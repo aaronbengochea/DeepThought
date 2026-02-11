@@ -11,8 +11,6 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
-        case_sensitive=False,
-        extra="ignore",
     )
 
     # Application
@@ -21,22 +19,22 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
 
     # AWS
-    aws_region: str = "us-east-1"
-    aws_access_key_id: str | None = None
-    aws_secret_access_key: str | None = None
+    aws_region: str
+    aws_access_key_id: str
+    aws_secret_access_key: str
 
     # DynamoDB
     dynamodb_table_name: str = "deepthought-calculations"
-    dynamodb_endpoint_url: str | None = None  # For local DynamoDB
+    dynamodb_endpoint_url: str
 
     # LLM Configuration
     llm_model: str
 
     # Google Gemini
-    google_api_key: str = ""
+    google_api_key: str
 
     # CORS
-    cors_origins: list[str] = ["http://localhost:3000"]
+    cors_origins: list[str]
 
 
 @lru_cache
