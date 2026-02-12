@@ -61,10 +61,20 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 - [X] `agents/prompts/verification.py` — add `- **verify_subtraction(val1, val2, result)**: Verify that val1 - val2 == result`
 - [X] `agents/prompts/response.py` — update operation field description to include "subtract"
 
-### 1.10 Tests
-- [X] `tests/unit/test_tools.py` — add `TestSubtractValuesTool` and `TestVerifySubtractionTool` classes
-- [X] `tests/unit/test_math_ops.py` — add `TestSubtractValuesInput` and `TestSubtractValuesTool`
-- [X] `tests/unit/test_nodes.py` — add subtract-related tests for execution and verification nodes
+### 1.10 Subtraction Tests
+- [X] `tests/unit/test_tools.py` — add `TestSubtractValuesTool` (5 tests) and `TestVerifySubtractionTool` (5 tests) classes, plus subtract formatting test
+- [X] `tests/unit/test_math_ops.py` — add `TestSubtractValuesInput` (5 tests) and `TestSubtractValuesTool` (10 tests)
+- [X] `tests/unit/test_nodes.py` — add subtract execution, verification, and response node tests (3 tests)
+
+### 1.11 Multiplication Tests
+- [X] `tests/unit/test_math_ops.py` — add `TestMultiplyValuesInput` (5 tests) and `TestMultiplyValuesTool` (9 tests)
+- [X] `tests/unit/test_tools.py` — add `TestVerifyMultiplicationTool` message success/failure tests (2 tests)
+- [X] `tests/unit/test_nodes.py` — add multiply execution, verification, and response node tests (3 tests)
+
+### 1.12 Division Tests
+- [X] `tests/unit/test_math_ops.py` — add `TestDivideValuesInput` (5 tests) and `TestDivideValuesTool` (9 tests)
+- [X] `tests/unit/test_tools.py` — add `TestVerifyDivisionTool` message success/failure tests (2 tests)
+- [X] `tests/unit/test_nodes.py` — add divide execution, verification, and response node tests (3 tests)
 
 ---
 
