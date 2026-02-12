@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   dynamodb-local:
     image: amazon/dynamodb-local:latest
@@ -11,7 +9,7 @@ services:
     volumes:
       - ./data/dynamodb:/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8000/ || exit 1"]
+      test: ["CMD-SHELL", "curl -s http://localhost:8000/shell/ || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -24,7 +22,7 @@ services:
     ports:
       - "8001:8001"
     environment:
-      - DYNAMO_ENDPOINT=${DC_DYNAMO_ENDPOINT}
+      - DYNAMO_ENDPOINT=${DC_DYNAMODB_ENDPOINT}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_REGION=${AWS_REGION}
