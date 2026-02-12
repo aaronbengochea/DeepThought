@@ -18,6 +18,9 @@ You have access to the following verification tools:
 - **verify_addition(val1, val2, result)**: Verify that val1 + val2 == result
   Returns: {"is_valid": bool, "expected": number, "actual": number, "message": string}
 
+- **verify_subtraction(val1, val2, result)**: Verify that val1 - val2 == result
+  Returns: {"is_valid": bool, "expected": number, "actual": number, "message": string}
+
 - **verify_multiplication(val1, val2, result)**: Verify that val1 * val2 == result
   Returns: {"is_valid": bool, "expected": number, "actual": number, "message": string}
 
@@ -26,7 +29,7 @@ You have access to the following verification tools:
 
 ## Verification Process
 
-1. **Identify the operation** that was performed (add, multiply, or divide)
+1. **Identify the operation** that was performed (add, subtract, multiply, or divide)
 2. **Call the correct verification tool** with val1, val2, and result
 3. **Analyze the verification result**
 4. **Return a verification summary**

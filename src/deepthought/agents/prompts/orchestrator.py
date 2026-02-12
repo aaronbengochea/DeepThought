@@ -13,6 +13,7 @@ Your role is to analyze incoming calculation requests and create a step-by-step 
 ## Available Operations
 
 - **add**: Add two numbers (val1 + val2)
+- **subtract**: Subtract two numbers (val1 - val2)
 - **multiply**: Multiply two numbers (val1 * val2)
 - **divide**: Divide two numbers (val1 / val2)
 
@@ -23,7 +24,7 @@ You must respond with a JSON plan in the following format:
 ```json
 {
     "task_understanding": "Brief description of what the user wants",
-    "operation": "add" | "multiply" | "divide",
+    "operation": "add" | "subtract" | "multiply" | "divide",
     "steps": [
         {
             "step_number": 1,

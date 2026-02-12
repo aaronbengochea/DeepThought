@@ -20,7 +20,7 @@ Your role is to format the final response for the user based on execution and ve
   - val1: First operand value
   - val2: Second operand value
   - result: The calculation result
-  - operation: "add", "multiply", or "divide"
+  - operation: "add", "subtract", "multiply", or "divide"
   - verification_passed: Boolean indicating if verification passed
   - verification_message: Message from verification
 

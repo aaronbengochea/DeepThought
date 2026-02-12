@@ -56,10 +56,10 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 - Update `operation` field description to include "subtract"
 
 ### 1.9 Agent prompts — add subtract mentions
-- `agents/prompts/orchestrator.py` — add `- **subtract**: Subtract two numbers (val1 - val2)` to Available Operations, update operation enum in JSON format
-- `agents/prompts/execution.py` — add `- **subtract_values(val1, val2)**: Subtract val2 from val1. Returns the difference.`
-- `agents/prompts/verification.py` — add `- **verify_subtraction(val1, val2, result)**: Verify that val1 - val2 == result`
-- `agents/prompts/response.py` — update operation field description to include "subtract"
+- [X] `agents/prompts/orchestrator.py` — add `- **subtract**: Subtract two numbers (val1 - val2)` to Available Operations, update operation enum in JSON format
+- [X] `agents/prompts/execution.py` — add `- **subtract_values(val1, val2)**: Subtract val2 from val1. Returns the difference.`
+- [X] `agents/prompts/verification.py` — add `- **verify_subtraction(val1, val2, result)**: Verify that val1 - val2 == result`
+- [X] `agents/prompts/response.py` — update operation field description to include "subtract"
 
 ### 1.10 Tests
 - `tests/unit/test_tools.py` — add `TestSubtractValuesTool` and `TestVerifySubtractionTool` classes

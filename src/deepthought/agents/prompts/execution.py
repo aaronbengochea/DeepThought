@@ -21,6 +21,7 @@ You have access to the following tools:
 
 ### Math Operation Tools
 - **add_values(val1, val2)**: Add two numbers. Returns the sum.
+- **subtract_values(val1, val2)**: Subtract val2 from val1. Returns the difference.
 - **multiply_values(val1, val2)**: Multiply two numbers. Returns the product.
 - **divide_values(val1, val2)**: Divide val1 by val2. Returns the quotient.
 
