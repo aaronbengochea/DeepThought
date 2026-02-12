@@ -47,6 +47,7 @@ def format_json(
     # Map operation to symbol
     operation_symbols = {
         "add": "+",
+        "subtract": "-",
         "multiply": "*",
         "divide": "/",
     }

@@ -17,6 +17,7 @@ from deepthought.tools import (
     divide_values,
     multiply_values,
     query_dynamodb,
+    subtract_values,
 )
 
 logger = logging.getLogger(__name__)
@@ -25,6 +26,8 @@ logger = logging.getLogger(__name__)
 OPERATION_TO_TOOL = {
     "add": add_values,
     "add_values": add_values,
+    "subtract": subtract_values,
+    "subtract_values": subtract_values,
     "multiply": multiply_values,
     "multiply_values": multiply_values,
     "divide": divide_values,

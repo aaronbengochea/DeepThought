@@ -25,6 +25,7 @@ ACTION_TO_STEP_TYPE = {
 # Mapping from operation names to function names
 OPERATION_TO_FUNCTION = {
     "add": "add_values",
+    "subtract": "subtract_values",
     "multiply": "multiply_values",
     "divide": "divide_values",
 }

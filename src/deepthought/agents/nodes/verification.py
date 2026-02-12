@@ -15,6 +15,7 @@ from deepthought.tools import (
     verify_addition,
     verify_division,
     verify_multiplication,
+    verify_subtraction,
 )
 
 logger = logging.getLogger(__name__)
@@ -23,6 +24,8 @@ logger = logging.getLogger(__name__)
 OPERATION_TO_VERIFY_TOOL = {
     "add": verify_addition,
     "add_values": verify_addition,
+    "subtract": verify_subtraction,
+    "subtract_values": verify_subtraction,
     "multiply": verify_multiplication,
     "multiply_values": verify_multiplication,
     "divide": verify_division,
@@ -65,11 +68,13 @@ async def verification_node(state: AgentState) -> dict[str, Any]:
     for tr in execution_result.tool_results:
         if tr.tool_name == "query_dynamodb" and tr.success:
             db_result = tr.output
-        elif tr.tool_name in ("add_values", "multiply_values", "divide_values") and tr.success:
+        elif tr.tool_name in ("add_values", "subtract_values", "multiply_values", "divide_values") and tr.success:
             calc_result = tr.output
             # Extract operation from tool name
             if tr.tool_name == "add_values":
                 operation = "add"
+            elif tr.tool_name == "subtract_values":
+                operation = "subtract"
             elif tr.tool_name == "multiply_values":
                 operation = "multiply"
             elif tr.tool_name == "divide_values":

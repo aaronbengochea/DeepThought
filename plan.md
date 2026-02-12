@@ -35,24 +35,24 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 - [X] Add `verify_subtraction` to `VERIFICATION_TOOLS`
 
 ### 1.4 `src/deepthought/agents/nodes/orchestrator.py`
-- Add `"subtract": "subtract_values"` to `OPERATION_TO_FUNCTION` dict (line 26)
+- [X] Add `"subtract": "subtract_values"` to `OPERATION_TO_FUNCTION` dict (line 26)
 
 ### 1.5 `src/deepthought/agents/nodes/execution.py`
-- Import `subtract_values`
-- Add `"subtract": subtract_values` and `"subtract_values": subtract_values` to `OPERATION_TO_TOOL` dict (line 25)
+- [X] Import `subtract_values`
+- [X] Add `"subtract": subtract_values` and `"subtract_values": subtract_values` to `OPERATION_TO_TOOL` dict (line 25)
 
 ### 1.6 `src/deepthought/agents/nodes/verification.py`
-- Import `verify_subtraction`
-- Add `"subtract": verify_subtraction` and `"subtract_values": verify_subtraction` to `OPERATION_TO_VERIFY_TOOL` (line 23)
-- Add `"subtract_values"` to the tool_name check on line 68: `tr.tool_name in ("add_values", "subtract_values", "multiply_values", "divide_values")`
-- Add `elif tr.tool_name == "subtract_values": operation = "subtract"` after line 76
+- [X] Import `verify_subtraction`
+- [X] Add `"subtract": verify_subtraction` and `"subtract_values": verify_subtraction` to `OPERATION_TO_VERIFY_TOOL` (line 23)
+- [X] Add `"subtract_values"` to the tool_name check on line 68: `tr.tool_name in ("add_values", "subtract_values", "multiply_values", "divide_values")`
+- [X] Add `elif tr.tool_name == "subtract_values": operation = "subtract"` after line 76
 
 ### 1.7 `src/deepthought/agents/nodes/response.py`
-- Add `"subtract_values"` to the tool_name check on line 72
-- Add `elif tr.tool_name == "subtract_values": operation = "subtract"` after line 80
+- [X] Add `"subtract_values"` to the tool_name check on line 72
+- [X] Add `elif tr.tool_name == "subtract_values": operation = "subtract"` after line 80
 
 ### 1.8 `src/deepthought/tools/formatting.py`
-- Add `"subtract": "-"` to `operation_symbols` dict (line 48)
+- [X] Add `"subtract": "-"` to `operation_symbols` dict (line 48)
 - Update `operation` field description to include "subtract"
 
 ### 1.9 Agent prompts — add subtract mentions
