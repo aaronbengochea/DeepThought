@@ -22,17 +22,17 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 **Verify:** `pytest tests/unit/` — all existing tests pass, new subtract tests pass.
 
 ### 1.1 `src/deepthought/tools/math_ops.py`
-- Add `SubtractValuesInput(BaseModel)` with `val1`, `val2` fields (same pattern as `AddValuesInput`)
-- Add `@tool(args_schema=SubtractValuesInput) def subtract_values(val1, val2) -> int | float` returning `val1 - val2`
+- [X] Add `SubtractValuesInput(BaseModel)` with `val1`, `val2` fields (same pattern as `AddValuesInput`)
+- [X] Add `@tool(args_schema=SubtractValuesInput) def subtract_values(val1, val2) -> int | float` returning `val1 - val2`
 
 ### 1.2 `src/deepthought/tools/verification.py`
-- Add `VerifySubtractionInput(BaseModel)` with `val1`, `val2`, `result` fields
-- Add `@tool(args_schema=VerifySubtractionInput) def verify_subtraction(val1, val2, result) -> dict` checking `val1 - val2 == result`
+- [X] Add `VerifySubtractionInput(BaseModel)` with `val1`, `val2`, `result` fields
+- [X] Add `@tool(args_schema=VerifySubtractionInput) def verify_subtraction(val1, val2, result) -> dict` checking `val1 - val2 == result`
 
 ### 1.3 `src/deepthought/tools/__init__.py`
-- Import `subtract_values` and `verify_subtraction`
-- Add `subtract_values` to `EXECUTION_TOOLS`
-- Add `verify_subtraction` to `VERIFICATION_TOOLS`
+- [X] Import `subtract_values` and `verify_subtraction`
+- [X] Add `subtract_values` to `EXECUTION_TOOLS`
+- [X] Add `verify_subtraction` to `VERIFICATION_TOOLS`
 
 ### 1.4 `src/deepthought/agents/nodes/orchestrator.py`
 - Add `"subtract": "subtract_values"` to `OPERATION_TO_FUNCTION` dict (line 26)

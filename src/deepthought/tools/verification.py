@@ -31,6 +31,14 @@ class VerifyDivisionInput(BaseModel):
     )
 
 
+class VerifySubtractionInput(BaseModel):
+    """Input schema for verify_subtraction tool."""
+
+    val1: int | float = Field(..., description="Value that was subtracted from")
+    val2: int | float = Field(..., description="Value that was subtracted")
+    result: int | float = Field(..., description="The result to verify")
+
+
 class VerificationResult(BaseModel):
     """Result of a verification check."""
 
@@ -68,6 +76,38 @@ def verify_addition(
             f"Verification passed: {val1} + {val2} = {result}"
             if is_valid
             else f"Verification failed: {val1} + {val2} = {expected}, but got {result}"
+        ),
+    }
+
+
+@tool(args_schema=VerifySubtractionInput)
+def verify_subtraction(
+    val1: int | float, val2: int | float, result: int | float
+) -> dict:
+    """
+    Verify that a subtraction result is correct.
+
+    Checks if val1 - val2 == result.
+
+    Args:
+        val1: Value that was subtracted from
+        val2: Value that was subtracted
+        result: The result to verify
+
+    Returns:
+        A dict with is_valid, expected, actual, and message fields.
+    """
+    expected = val1 - val2
+    is_valid = expected == result
+
+    return {
+        "is_valid": is_valid,
+        "expected": expected,
+        "actual": result,
+        "message": (
+            f"Verification passed: {val1} - {val2} = {result}"
+            if is_valid
+            else f"Verification failed: {val1} - {val2} = {expected}, but got {result}"
         ),
     }
 

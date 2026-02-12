@@ -70,3 +70,25 @@ def divide_values(val1: int | float, val2: int | float) -> float | str:
     if val2 == 0:
         return "Error: Division by zero is not allowed"
     return val1 / val2
+
+
+class SubtractValuesInput(BaseModel):
+    """Input schema for subtract_values tool."""
+
+    val1: int | float = Field(..., description="Value to subtract from")
+    val2: int | float = Field(..., description="Value to subtract")
+
+
+@tool(args_schema=SubtractValuesInput)
+def subtract_values(val1: int | float, val2: int | float) -> int | float:
+    """
+    Subtract val2 from val1.
+
+    Args:
+        val1: Value to subtract from
+        val2: Value to subtract
+
+    Returns:
+        The difference of val1 - val2.
+    """
+    return val1 - val2
