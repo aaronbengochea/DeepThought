@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     # DynamoDB
     dynamodb_table_name: str = "deepthought-calculations"
     dynamodb_endpoint_url: str
+    dc_dynamodb_endpoint: str
 
     # LLM Configuration
     llm_model: str
