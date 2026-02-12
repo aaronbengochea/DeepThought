@@ -203,6 +203,16 @@ class TestVerifyMultiplicationTool:
         result = verify_multiplication.invoke({"val1": 100, "val2": 0, "result": 0})
         assert result["is_valid"] is True
 
+    def test_message_on_success(self):
+        """Test success message."""
+        result = verify_multiplication.invoke({"val1": 3, "val2": 4, "result": 12})
+        assert "passed" in result["message"].lower()
+
+    def test_message_on_failure(self):
+        """Test failure message."""
+        result = verify_multiplication.invoke({"val1": 3, "val2": 4, "result": 10})
+        assert "failed" in result["message"].lower()
+
 
 class TestVerifyDivisionTool:
     """Tests for verify_division tool."""

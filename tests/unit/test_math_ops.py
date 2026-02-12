@@ -2,7 +2,14 @@
 
 import pytest
 
-from deepthought.tools.math_ops import AddValuesInput, SubtractValuesInput, add_values, subtract_values
+from deepthought.tools.math_ops import (
+    AddValuesInput,
+    MultiplyValuesInput,
+    SubtractValuesInput,
+    add_values,
+    multiply_values,
+    subtract_values,
+)
 
 
 class TestAddValuesInput:
@@ -190,3 +197,83 @@ class TestSubtractValuesTool:
         """Test tool has description."""
         assert subtract_values.description is not None
         assert "subtract" in subtract_values.description.lower()
+
+
+class TestMultiplyValuesInput:
+    """Tests for MultiplyValuesInput schema."""
+
+    def test_valid_integers(self):
+        """Test schema accepts valid integers."""
+        input_data = MultiplyValuesInput(val1=6, val2=7)
+        assert input_data.val1 == 6
+        assert input_data.val2 == 7
+
+    def test_valid_floats(self):
+        """Test schema accepts valid floats."""
+        input_data = MultiplyValuesInput(val1=2.5, val2=4.0)
+        assert input_data.val1 == 2.5
+        assert input_data.val2 == 4.0
+
+    def test_negative_values(self):
+        """Test schema accepts negative values."""
+        input_data = MultiplyValuesInput(val1=-5, val2=3)
+        assert input_data.val1 == -5
+        assert input_data.val2 == 3
+
+    def test_missing_val1_raises_error(self):
+        """Test schema requires val1."""
+        with pytest.raises(ValueError):
+            MultiplyValuesInput(val2=7)  # type: ignore[call-arg]
+
+    def test_missing_val2_raises_error(self):
+        """Test schema requires val2."""
+        with pytest.raises(ValueError):
+            MultiplyValuesInput(val1=6)  # type: ignore[call-arg]
+
+
+class TestMultiplyValuesTool:
+    """Tests for multiply_values tool (test_math_ops)."""
+
+    def test_multiply_positive_integers(self):
+        """Test multiplying two positive integers."""
+        result = multiply_values.invoke({"val1": 6, "val2": 7})
+        assert result == 42
+
+    def test_multiply_positive_floats(self):
+        """Test multiplying two positive floats."""
+        result = multiply_values.invoke({"val1": 2.5, "val2": 4.0})
+        assert result == 10.0
+
+    def test_multiply_by_zero(self):
+        """Test multiplying by zero."""
+        result = multiply_values.invoke({"val1": 100, "val2": 0})
+        assert result == 0
+
+    def test_multiply_negative_by_positive(self):
+        """Test multiplying negative by positive."""
+        result = multiply_values.invoke({"val1": -5, "val2": 3})
+        assert result == -15
+
+    def test_multiply_two_negatives(self):
+        """Test multiplying two negatives."""
+        result = multiply_values.invoke({"val1": -4, "val2": -5})
+        assert result == 20
+
+    def test_multiply_by_one(self):
+        """Test multiplying by one (identity)."""
+        result = multiply_values.invoke({"val1": 42, "val2": 1})
+        assert result == 42
+
+    def test_multiply_large_numbers(self):
+        """Test multiplying large numbers."""
+        result = multiply_values.invoke({"val1": 1_000, "val2": 1_000})
+        assert result == 1_000_000
+
+    def test_tool_name(self):
+        """Test tool has correct name."""
+        assert multiply_values.name == "multiply_values"
+
+    def test_tool_description(self):
+        """Test tool has description."""
+        assert multiply_values.description is not None
+        assert "multiply" in multiply_values.description.lower()
