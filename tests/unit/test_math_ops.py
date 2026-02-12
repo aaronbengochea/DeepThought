@@ -2,7 +2,7 @@
 
 import pytest
 
-from deepthought.tools.math_ops import AddValuesInput, add_values
+from deepthought.tools.math_ops import AddValuesInput, SubtractValuesInput, add_values, subtract_values
 
 
 class TestAddValuesInput:
@@ -105,3 +105,88 @@ class TestAddValuesTool:
         """Test tool has description."""
         assert add_values.description is not None
         assert "add" in add_values.description.lower()
+
+
+class TestSubtractValuesInput:
+    """Tests for SubtractValuesInput schema."""
+
+    def test_valid_integers(self):
+        """Test schema accepts valid integers."""
+        input_data = SubtractValuesInput(val1=20, val2=10)
+        assert input_data.val1 == 20
+        assert input_data.val2 == 10
+
+    def test_valid_floats(self):
+        """Test schema accepts valid floats."""
+        input_data = SubtractValuesInput(val1=20.5, val2=10.5)
+        assert input_data.val1 == 20.5
+        assert input_data.val2 == 10.5
+
+    def test_negative_values(self):
+        """Test schema accepts negative values."""
+        input_data = SubtractValuesInput(val1=-10, val2=-20)
+        assert input_data.val1 == -10
+        assert input_data.val2 == -20
+
+    def test_missing_val1_raises_error(self):
+        """Test schema requires val1."""
+        with pytest.raises(ValueError):
+            SubtractValuesInput(val2=20)  # type: ignore[call-arg]
+
+    def test_missing_val2_raises_error(self):
+        """Test schema requires val2."""
+        with pytest.raises(ValueError):
+            SubtractValuesInput(val1=10)  # type: ignore[call-arg]
+
+
+class TestSubtractValuesTool:
+    """Tests for subtract_values tool."""
+
+    def test_subtract_positive_integers(self):
+        """Test subtracting two positive integers."""
+        result = subtract_values.invoke({"val1": 100, "val2": 42})
+        assert result == 58
+
+    def test_subtract_positive_floats(self):
+        """Test subtracting two positive floats."""
+        result = subtract_values.invoke({"val1": 10.5, "val2": 3.5})
+        assert result == 7.0
+
+    def test_subtract_negative_values(self):
+        """Test subtracting negative values."""
+        result = subtract_values.invoke({"val1": -10, "val2": -20})
+        assert result == 10
+
+    def test_subtract_mixed_positive_negative(self):
+        """Test subtracting negative from positive."""
+        result = subtract_values.invoke({"val1": 50, "val2": -50})
+        assert result == 100
+
+    def test_subtract_resulting_in_negative(self):
+        """Test subtraction resulting in a negative number."""
+        result = subtract_values.invoke({"val1": 10, "val2": 20})
+        assert result == -10
+
+    def test_subtract_zeros(self):
+        """Test subtracting zeros."""
+        result = subtract_values.invoke({"val1": 0, "val2": 0})
+        assert result == 0
+
+    def test_subtract_from_zero(self):
+        """Test subtracting from zero."""
+        result = subtract_values.invoke({"val1": 0, "val2": 42})
+        assert result == -42
+
+    def test_subtract_large_numbers(self):
+        """Test subtracting large numbers."""
+        result = subtract_values.invoke({"val1": 3_000_000, "val2": 1_000_000})
+        assert result == 2_000_000
+
+    def test_tool_name(self):
+        """Test tool has correct name."""
+        assert subtract_values.name == "subtract_values"
+
+    def test_tool_description(self):
+        """Test tool has description."""
+        assert subtract_values.description is not None
+        assert "subtract" in subtract_values.description.lower()

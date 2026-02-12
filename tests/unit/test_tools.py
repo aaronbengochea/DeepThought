@@ -12,6 +12,7 @@ from deepthought.tools.math_ops import (
 )
 from deepthought.tools.verification import (
     verify_addition,
+    verify_subtraction,
     verify_multiplication,
     verify_division,
 )
@@ -86,6 +87,39 @@ class TestDivideValuesTool:
         assert divide_values.name == "divide_values"
 
 
+class TestSubtractValuesTool:
+    """Tests for subtract_values tool."""
+
+    def test_subtract_positive_integers(self):
+        """Test subtracting two positive integers."""
+        from deepthought.tools.math_ops import subtract_values
+        result = subtract_values.invoke({"val1": 100, "val2": 42})
+        assert result == 58
+
+    def test_subtract_resulting_in_negative(self):
+        """Test subtraction resulting in negative."""
+        from deepthought.tools.math_ops import subtract_values
+        result = subtract_values.invoke({"val1": 10, "val2": 20})
+        assert result == -10
+
+    def test_subtract_with_zero(self):
+        """Test subtracting zero."""
+        from deepthought.tools.math_ops import subtract_values
+        result = subtract_values.invoke({"val1": 42, "val2": 0})
+        assert result == 42
+
+    def test_subtract_negative_values(self):
+        """Test subtracting negative from negative."""
+        from deepthought.tools.math_ops import subtract_values
+        result = subtract_values.invoke({"val1": -5, "val2": -3})
+        assert result == -2
+
+    def test_tool_name(self):
+        """Test tool has correct name."""
+        from deepthought.tools.math_ops import subtract_values
+        assert subtract_values.name == "subtract_values"
+
+
 class TestVerifyAdditionTool:
     """Tests for verify_addition tool."""
 
@@ -112,6 +146,39 @@ class TestVerifyAdditionTool:
         """Test failure message."""
         result = verify_addition.invoke({"val1": 1, "val2": 1, "result": 3})
         assert "failed" in result["message"].lower()
+
+
+class TestVerifySubtractionTool:
+    """Tests for verify_subtraction tool."""
+
+    def test_correct_subtraction(self):
+        """Test verification passes for correct subtraction."""
+        result = verify_subtraction.invoke({"val1": 100, "val2": 42, "result": 58})
+        assert result["is_valid"] is True
+        assert result["expected"] == 58
+        assert result["actual"] == 58
+
+    def test_incorrect_subtraction(self):
+        """Test verification fails for incorrect subtraction."""
+        result = verify_subtraction.invoke({"val1": 100, "val2": 42, "result": 50})
+        assert result["is_valid"] is False
+        assert result["expected"] == 58
+        assert result["actual"] == 50
+
+    def test_message_on_success(self):
+        """Test success message."""
+        result = verify_subtraction.invoke({"val1": 10, "val2": 3, "result": 7})
+        assert "passed" in result["message"].lower()
+
+    def test_message_on_failure(self):
+        """Test failure message."""
+        result = verify_subtraction.invoke({"val1": 10, "val2": 3, "result": 5})
+        assert "failed" in result["message"].lower()
+
+    def test_negative_result(self):
+        """Test verification with negative result."""
+        result = verify_subtraction.invoke({"val1": 5, "val2": 10, "result": -5})
+        assert result["is_valid"] is True
 
 
 class TestVerifyMultiplicationTool:
@@ -221,6 +288,21 @@ class TestFormatJsonTool:
 
         assert result["calculation"]["operation"] == "divide"
         assert "/" in result["calculation"]["expression"]
+
+    def test_format_subtraction(self):
+        """Test formatting subtraction result."""
+        result = format_json.invoke({
+            "val1": 100,
+            "val2": 42,
+            "result": 58,
+            "operation": "subtract",
+            "verification_passed": True,
+            "verification_message": "OK",
+        })
+
+        assert result["calculation"]["operation"] == "subtract"
+        assert "-" in result["calculation"]["expression"]
+        assert result["calculation"]["result"] == 58
 
     def test_format_failed_verification(self):
         """Test formatting with failed verification."""

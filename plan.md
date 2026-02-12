@@ -62,9 +62,9 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 - [X] `agents/prompts/response.py` — update operation field description to include "subtract"
 
 ### 1.10 Tests
-- `tests/unit/test_tools.py` — add `TestSubtractValuesTool` and `TestVerifySubtractionTool` classes
-- `tests/unit/test_math_ops.py` — add `TestSubtractValuesInput` and `TestSubtractValuesTool`
-- `tests/unit/test_nodes.py` — add subtract-related tests for execution and verification nodes
+- [X] `tests/unit/test_tools.py` — add `TestSubtractValuesTool` and `TestVerifySubtractionTool` classes
+- [X] `tests/unit/test_math_ops.py` — add `TestSubtractValuesInput` and `TestSubtractValuesTool`
+- [X] `tests/unit/test_nodes.py` — add subtract-related tests for execution and verification nodes
 
 ---
 
