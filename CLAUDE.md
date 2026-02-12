@@ -50,7 +50,7 @@ Each node is an async function in `src/deepthought/agents/nodes/` that receives 
 
 - **`api/`** — FastAPI app factory (`create_app()`), routes, dependency injection via `Depends()`
 - **`agents/`** — LangGraph graph definition, node implementations, routing edges, system prompts per agent
-- **`tools/`** — LangChain `@tool`-decorated functions: `database.py` (DynamoDB query), `math_ops.py` (add/multiply/divide), `verification.py`, `formatting.py`. Tool groups exported as `EXECUTION_TOOLS`, `VERIFICATION_TOOLS`, `RESPONSE_TOOLS`
+- **`tools/`** — LangChain `@tool`-decorated functions: `database.py` (DynamoDB query), `math_ops.py` (add/subtract/multiply/divide), `verification.py`, `formatting.py`. Tool groups exported as `EXECUTION_TOOLS`, `VERIFICATION_TOOLS`, `RESPONSE_TOOLS`
 - **`models/`** — Pydantic v2 models for agents, database, requests, responses
 - **`llm/provider.py`** — Factory pattern returning Google Gemini `BaseChatModel` via `LLM_MODEL` env var
 - **`db/client.py`** — Async DynamoDB wrapper using aioboto3
@@ -88,7 +88,7 @@ Copy `.env.example` to `.env`. All variables are required (no hardcoded defaults
 - `GOOGLE_API_KEY`: Google API key
 - `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`: AWS credentials
 - `DYNAMODB_ENDPOINT_URL`: DynamoDB endpoint (e.g., `http://localhost:8000`)
-- `DC_DYNAMO_ENDPOINT`: Docker-internal DynamoDB endpoint (e.g., `http://deepthought-dynamodb:8000`)
+- `DC_DYNAMODB_ENDPOINT`: Docker-internal DynamoDB endpoint (e.g., `http://deepthought-dynamodb:8000`)
 - `CORS_ORIGINS`: Allowed CORS origins
 
 ## Docker Services
