@@ -4,9 +4,11 @@ import pytest
 
 from deepthought.tools.math_ops import (
     AddValuesInput,
+    DivideValuesInput,
     MultiplyValuesInput,
     SubtractValuesInput,
     add_values,
+    divide_values,
     multiply_values,
     subtract_values,
 )
@@ -277,3 +279,85 @@ class TestMultiplyValuesTool:
         """Test tool has description."""
         assert multiply_values.description is not None
         assert "multiply" in multiply_values.description.lower()
+
+
+class TestDivideValuesInput:
+    """Tests for DivideValuesInput schema."""
+
+    def test_valid_integers(self):
+        """Test schema accepts valid integers."""
+        input_data = DivideValuesInput(val1=100, val2=4)
+        assert input_data.val1 == 100
+        assert input_data.val2 == 4
+
+    def test_valid_floats(self):
+        """Test schema accepts valid floats."""
+        input_data = DivideValuesInput(val1=7.5, val2=2.5)
+        assert input_data.val1 == 7.5
+        assert input_data.val2 == 2.5
+
+    def test_negative_values(self):
+        """Test schema accepts negative values."""
+        input_data = DivideValuesInput(val1=-10, val2=2)
+        assert input_data.val1 == -10
+        assert input_data.val2 == 2
+
+    def test_missing_val1_raises_error(self):
+        """Test schema requires val1."""
+        with pytest.raises(ValueError):
+            DivideValuesInput(val2=4)  # type: ignore[call-arg]
+
+    def test_missing_val2_raises_error(self):
+        """Test schema requires val2."""
+        with pytest.raises(ValueError):
+            DivideValuesInput(val1=100)  # type: ignore[call-arg]
+
+
+class TestDivideValuesTool:
+    """Tests for divide_values tool (test_math_ops)."""
+
+    def test_divide_positive_integers(self):
+        """Test dividing two positive integers."""
+        result = divide_values.invoke({"val1": 100, "val2": 4})
+        assert result == 25.0
+
+    def test_divide_with_remainder(self):
+        """Test dividing with remainder."""
+        result = divide_values.invoke({"val1": 10, "val2": 3})
+        assert result == pytest.approx(3.333333, rel=1e-4)
+
+    def test_divide_by_zero(self):
+        """Test dividing by zero returns error."""
+        result = divide_values.invoke({"val1": 10, "val2": 0})
+        assert isinstance(result, str)
+        assert "Error" in result
+        assert "zero" in result.lower()
+
+    def test_divide_negative_by_positive(self):
+        """Test dividing negative by positive."""
+        result = divide_values.invoke({"val1": -10, "val2": 2})
+        assert result == -5.0
+
+    def test_divide_floats(self):
+        """Test dividing floats."""
+        result = divide_values.invoke({"val1": 7.5, "val2": 2.5})
+        assert result == 3.0
+
+    def test_divide_by_one(self):
+        """Test dividing by one (identity)."""
+        result = divide_values.invoke({"val1": 42, "val2": 1})
+        assert result == 42.0
+
+    def test_divide_same_values(self):
+        """Test dividing a number by itself."""
+        result = divide_values.invoke({"val1": 99, "val2": 99})
+        assert result == 1.0
+
+    def test_tool_name(self):
+        """Test tool has correct name."""
+        assert divide_values.name == "divide_values"
+
+    def test_tool_description(self):
+        """Test tool has description."""
+        assert divide_values.description is not None
+        assert "divide" in divide_values.description.lower()

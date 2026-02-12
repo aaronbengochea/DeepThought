@@ -241,6 +241,46 @@ class TestExecutionNode:
 
     @pytest.mark.asyncio
     @patch("deepthought.agents.nodes.execution.query_dynamodb")
+    @patch("deepthought.agents.nodes.execution.divide_values")
+    async def test_successful_divide_execution(self, mock_divide, mock_query):
+        """Test successful divide execution with mocked tools."""
+        mock_query.ainvoke = AsyncMock(
+            return_value={"pk": "CALC#test", "sk": "ITEM#001", "val1": 100, "val2": 4}
+        )
+        mock_divide.invoke.return_value = 25.0
+
+        plan = Plan(
+            plan_id="test-123",
+            created_at=datetime.now(timezone.utc),
+            task_description="Test",
+            steps=[
+                PlanStep(
+                    step_number=1,
+                    step_type=PlanStepType.QUERY_DATABASE,
+                    description="Query",
+                    parameters={"pk": "CALC#test", "sk": "ITEM#001"},
+                ),
+                PlanStep(
+                    step_number=2,
+                    step_type=PlanStepType.EXECUTE_FUNCTION,
+                    description="Divide",
+                    parameters={"function": "divide_values", "operation": "divide"},
+                    depends_on=[1],
+                ),
+            ],
+            expected_outcome="Quotient",
+        )
+        state = create_base_state(plan=plan)
+
+        result = await execution_node(state)
+
+        assert result["execution_result"] is not None
+        assert result["execution_result"].success is True
+        assert result["execution_result"].final_value == 25.0
+        assert result["current_step"] == "execution_complete"
+
+    @pytest.mark.asyncio
+    @patch("deepthought.agents.nodes.execution.query_dynamodb")
     @patch("deepthought.agents.nodes.execution.subtract_values")
     async def test_successful_subtract_execution(self, mock_subtract, mock_query):
         """Test successful subtract execution with mocked tools."""
@@ -364,6 +404,46 @@ class TestVerificationNode:
                 ),
             ],
             final_value=42,
+            success=True,
+        )
+        state = create_base_state(plan=plan, execution_result=execution_result)
+
+        result = await verification_node(state)
+
+        assert result["verification_result"] is not None
+        assert result["verification_result"].overall_status == VerificationStatus.PASSED
+        assert result["verification_result"].confidence_score == 1.0
+
+    @pytest.mark.asyncio
+    async def test_successful_divide_verification(self):
+        """Test successful verification for divide operation."""
+        plan = Plan(
+            plan_id="test-123",
+            created_at=datetime.now(timezone.utc),
+            task_description="Test",
+            steps=[],
+            expected_outcome="Quotient",
+        )
+        execution_result = ExecutionResult(
+            plan_id="test-123",
+            executed_steps=[1, 2],
+            tool_results=[
+                ToolCallResult(
+                    tool_name="query_dynamodb",
+                    input_params={"pk": "CALC#test"},
+                    output={"pk": "CALC#test", "val1": 100, "val2": 4},
+                    success=True,
+                    execution_time_ms=10.0,
+                ),
+                ToolCallResult(
+                    tool_name="divide_values",
+                    input_params={"val1": 100, "val2": 4},
+                    output=25.0,
+                    success=True,
+                    execution_time_ms=1.0,
+                ),
+            ],
+            final_value=25.0,
             success=True,
         )
         state = create_base_state(plan=plan, execution_result=execution_result)
@@ -679,6 +759,67 @@ class TestResponseNode:
         assert result["formatted_response"].data["val2"] == 7
         assert result["formatted_response"].data["result"] == 42
         assert result["formatted_response"].data["operation"] == "multiply"
+
+    @pytest.mark.asyncio
+    async def test_successful_divide_response(self):
+        """Test response node formats successful divide result."""
+        plan = Plan(
+            plan_id="test-123",
+            created_at=datetime.now(timezone.utc),
+            task_description="Test",
+            steps=[],
+            expected_outcome="Quotient",
+        )
+        execution_result = ExecutionResult(
+            plan_id="test-123",
+            executed_steps=[1, 2],
+            tool_results=[
+                ToolCallResult(
+                    tool_name="query_dynamodb",
+                    input_params={"pk": "CALC#test"},
+                    output={"pk": "CALC#test", "val1": 100, "val2": 4},
+                    success=True,
+                    execution_time_ms=10.0,
+                ),
+                ToolCallResult(
+                    tool_name="divide_values",
+                    input_params={"val1": 100, "val2": 4},
+                    output=25.0,
+                    success=True,
+                    execution_time_ms=1.0,
+                ),
+            ],
+            final_value=25.0,
+            success=True,
+        )
+        verification_result = VerificationResult(
+            plan_id="test-123",
+            checks=[
+                VerificationCheck(
+                    check_name="division_correctness",
+                    expected_value=25.0,
+                    actual_value=25.0,
+                    status=VerificationStatus.PASSED,
+                    message="OK",
+                )
+            ],
+            overall_status=VerificationStatus.PASSED,
+            confidence_score=1.0,
+            reasoning="All passed",
+        )
+        state = create_base_state(
+            plan=plan,
+            execution_result=execution_result,
+            verification_result=verification_result,
+        )
+
+        result = await response_node(state)
+
+        assert result["formatted_response"].success is True
+        assert result["formatted_response"].data["val1"] == 100
+        assert result["formatted_response"].data["val2"] == 4
+        assert result["formatted_response"].data["result"] == 25.0
+        assert result["formatted_response"].data["operation"] == "divide"
 
     @pytest.mark.asyncio
     async def test_successful_subtract_response(self):

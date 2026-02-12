@@ -248,6 +248,16 @@ class TestVerifyDivisionTool:
         })
         assert result["is_valid"] is True
 
+    def test_message_on_success(self):
+        """Test success message."""
+        result = verify_division.invoke({"val1": 10, "val2": 2, "result": 5.0})
+        assert "passed" in result["message"].lower()
+
+    def test_message_on_failure(self):
+        """Test failure message."""
+        result = verify_division.invoke({"val1": 10, "val2": 2, "result": 4.0})
+        assert "failed" in result["message"].lower()
+
 
 class TestFormatJsonTool:
     """Tests for format_json tool."""
