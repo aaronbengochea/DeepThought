@@ -13,6 +13,10 @@ dependencies = [
     "langgraph>=0.0.40",
     "boto3>=1.34.0",
     "aioboto3>=12.0.0",
+    "bcrypt>=4.0.0",
+    "python-jose[cryptography]>=3.3.0",
+    "email-validator>=2.0.0",
+    "python-dotenv>=1.0.0",
 ]
 
 [project.optional-dependencies]
@@ -49,6 +53,9 @@ module = [
     "langchain_core.*",
     "langchain_google_genai.*",
     "langgraph.*",
+    "jose.*",
+    "bcrypt.*",
+    "dotenv.*",
 ]
 ignore_missing_imports = true
 

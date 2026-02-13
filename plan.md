@@ -157,13 +157,14 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 - [X] Add `get_users_db_client()`, `get_pairs_db_client()`, `get_logs_db_client()` — each returns a `DynamoDBClient` with the appropriate table name from settings
 
 ### 3.7 `scripts/seed_data.py`
-- Add `create_table` calls for `deepthought-users` (pk=S, sk=S), `deepthought-pairs` (pk=S, sk=S), `deepthought-logs` (pk=S, sk=S)
-- Seed a test user: email=`test@example.com`, name=`Test User`, bcrypt hash of `password123`
-- Seed two test pairs for the test user
-- Keep existing `deepthought-calculations` table and seed data
+- [X] Add `create_table` calls for `deepthought-users` (pk=S, sk=S), `deepthought-pairs` (pk=S, sk=S), `deepthought-logs` (pk=S, sk=S)
+- [X] Seed a test user: email=`test@example.com`, name=`Test User`, bcrypt hash of `password123`
+- [X] Seed two test pairs for the test user
+- [X] Keep existing `deepthought-calculations` table and seed data (will be deprecated in Phase 4)
 
 ### 3.8 `pyproject.toml`
-- Add: `"bcrypt>=4.0.0"`, `"python-jose[cryptography]>=3.3.0"`, `"email-validator>=2.0.0"` (required by `EmailStr` in `models/users.py`)
+- [X] Add: `"bcrypt>=4.0.0"`, `"python-jose[cryptography]>=3.3.0"`, `"email-validator>=2.0.0"`, `"python-dotenv>=1.0.0"`
+- [X] Add mypy overrides for `jose`, `bcrypt`, `dotenv`
 
 ### 3.9 Tests
 - `tests/unit/test_models.py` — add tests for all new models
