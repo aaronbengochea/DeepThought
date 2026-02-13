@@ -162,7 +162,7 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 - Keep existing `deepthought-calculations` table and seed data
 
 ### 3.8 `pyproject.toml`
-- Add: `"bcrypt>=4.0.0"`, `"python-jose[cryptography]>=3.3.0"`
+- Add: `"bcrypt>=4.0.0"`, `"python-jose[cryptography]>=3.3.0"`, `"email-validator>=2.0.0"` (required by `EmailStr` in `models/users.py`)
 
 ### 3.9 Tests
 - `tests/unit/test_models.py` — add tests for all new models
