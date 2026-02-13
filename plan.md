@@ -154,7 +154,7 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 - [X] Add table names and JWT_SECRET_KEY to `.env.example` and `.env`
 
 ### 3.6 `src/deepthought/api/dependencies.py`
-- Add `get_users_db_client()`, `get_pairs_db_client()`, `get_logs_db_client()` — each returns a `DynamoDBClient` with the appropriate table name from settings
+- [X] Add `get_users_db_client()`, `get_pairs_db_client()`, `get_logs_db_client()` — each returns a `DynamoDBClient` with the appropriate table name from settings
 
 ### 3.7 `scripts/seed_data.py`
 - Add `create_table` calls for `deepthought-users` (pk=S, sk=S), `deepthought-pairs` (pk=S, sk=S), `deepthought-logs` (pk=S, sk=S)

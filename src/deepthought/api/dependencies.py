@@ -25,3 +25,36 @@ def get_dynamodb_client() -> Generator[DynamoDBClient, None, None]:
         endpoint_url=settings.dynamodb_endpoint_url,
     )
     yield client
+
+
+def get_users_db_client() -> Generator[DynamoDBClient, None, None]:
+    """Dependency to get DynamoDB client for the users table."""
+    settings = get_settings()
+    client = DynamoDBClient(
+        table_name=settings.dynamodb_users_table,
+        region=settings.aws_region,
+        endpoint_url=settings.dynamodb_endpoint_url,
+    )
+    yield client
+
+
+def get_pairs_db_client() -> Generator[DynamoDBClient, None, None]:
+    """Dependency to get DynamoDB client for the pairs table."""
+    settings = get_settings()
+    client = DynamoDBClient(
+        table_name=settings.dynamodb_pairs_table,
+        region=settings.aws_region,
+        endpoint_url=settings.dynamodb_endpoint_url,
+    )
+    yield client
+
+
+def get_logs_db_client() -> Generator[DynamoDBClient, None, None]:
+    """Dependency to get DynamoDB client for the logs table."""
+    settings = get_settings()
+    client = DynamoDBClient(
+        table_name=settings.dynamodb_logs_table,
+        region=settings.aws_region,
+        endpoint_url=settings.dynamodb_endpoint_url,
+    )
+    yield client
