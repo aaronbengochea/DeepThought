@@ -16,8 +16,16 @@ from deepthought.models.agents import (
     VerificationStatus,
 )
 from deepthought.models.database import CalculationItem, DynamoDBItem
+from deepthought.models.logs import (
+    AgentStepOutput,
+    OperateRequest,
+    OperationLog,
+    OperationLogResponse,
+)
+from deepthought.models.pairs import Pair, PairCreate, PairResponse
 from deepthought.models.requests import TaskRequest
 from deepthought.models.responses import HealthResponse, TaskResponse
+from deepthought.models.users import AuthResponse, User, UserCreate, UserResponse, UserSignIn
 
 
 class TestPlanStepType:
@@ -437,3 +445,304 @@ class TestHealthResponse:
         assert response.status == "healthy"
         assert response.version == "0.1.0"
         assert response.timestamp == "2024-01-01T00:00:00Z"
+
+
+# --- User Models ---
+
+
+class TestUser:
+    """Tests for User model."""
+
+    def test_valid_user(self):
+        """Test creating a valid user."""
+        now = datetime.now(timezone.utc)
+        user = User(
+            email="test@example.com",
+            name="Test User",
+            password_hash="$2b$12$hashedpassword",
+            created_at=now,
+        )
+        assert user.email == "test@example.com"
+        assert user.name == "Test User"
+        assert user.password_hash == "$2b$12$hashedpassword"
+        assert user.created_at == now
+
+    def test_invalid_email(self):
+        """Test user with invalid email is rejected."""
+        with pytest.raises(ValueError):
+            User(
+                email="not-an-email",
+                name="Test User",
+                password_hash="$2b$12$hashedpassword",
+                created_at=datetime.now(timezone.utc),
+            )
+
+
+class TestUserCreate:
+    """Tests for UserCreate model."""
+
+    def test_valid_user_create(self):
+        """Test valid user creation request."""
+        user = UserCreate(
+            email="test@example.com",
+            name="Test User",
+            password="password123",
+        )
+        assert user.email == "test@example.com"
+        assert user.name == "Test User"
+        assert user.password == "password123"
+
+    def test_password_min_length(self):
+        """Test password must be at least 8 characters."""
+        with pytest.raises(ValueError):
+            UserCreate(
+                email="test@example.com",
+                name="Test User",
+                password="short",
+            )
+
+    def test_name_min_length(self):
+        """Test name must be at least 1 character."""
+        with pytest.raises(ValueError):
+            UserCreate(
+                email="test@example.com",
+                name="",
+                password="password123",
+            )
+
+    def test_invalid_email(self):
+        """Test invalid email is rejected."""
+        with pytest.raises(ValueError):
+            UserCreate(
+                email="bad-email",
+                name="Test User",
+                password="password123",
+            )
+
+
+class TestUserSignIn:
+    """Tests for UserSignIn model."""
+
+    def test_valid_sign_in(self):
+        """Test valid sign-in request."""
+        sign_in = UserSignIn(
+            email="test@example.com",
+            password="password123",
+        )
+        assert sign_in.email == "test@example.com"
+        assert sign_in.password == "password123"
+
+    def test_invalid_email(self):
+        """Test invalid email is rejected."""
+        with pytest.raises(ValueError):
+            UserSignIn(email="bad-email", password="password123")
+
+
+class TestUserResponse:
+    """Tests for UserResponse model."""
+
+    def test_valid_user_response(self):
+        """Test valid user response."""
+        now = datetime.now(timezone.utc)
+        response = UserResponse(
+            email="test@example.com",
+            name="Test User",
+            created_at=now,
+        )
+        assert response.email == "test@example.com"
+        assert response.name == "Test User"
+        assert response.created_at == now
+
+
+class TestAuthResponse:
+    """Tests for AuthResponse model."""
+
+    def test_valid_auth_response(self):
+        """Test valid auth response."""
+        now = datetime.now(timezone.utc)
+        response = AuthResponse(
+            token="jwt-token-here",
+            user=UserResponse(
+                email="test@example.com",
+                name="Test User",
+                created_at=now,
+            ),
+        )
+        assert response.token == "jwt-token-here"
+        assert response.user.email == "test@example.com"
+
+
+# --- Pair Models ---
+
+
+class TestPair:
+    """Tests for Pair model."""
+
+    def test_valid_pair(self):
+        """Test creating a valid pair."""
+        now = datetime.now(timezone.utc)
+        pair = Pair(
+            pair_id="pair-123",
+            user_email="test@example.com",
+            val1=42,
+            val2=58,
+            created_at=now,
+        )
+        assert pair.pair_id == "pair-123"
+        assert pair.user_email == "test@example.com"
+        assert pair.val1 == 42
+        assert pair.val2 == 58
+        assert pair.created_at == now
+
+    def test_float_values(self):
+        """Test pair with float values."""
+        pair = Pair(
+            pair_id="pair-123",
+            user_email="test@example.com",
+            val1=3.14,
+            val2=2.71,
+            created_at=datetime.now(timezone.utc),
+        )
+        assert pair.val1 == 3.14
+        assert pair.val2 == 2.71
+
+
+class TestPairCreate:
+    """Tests for PairCreate model."""
+
+    def test_valid_pair_create(self):
+        """Test valid pair creation request."""
+        pair = PairCreate(val1=42, val2=58)
+        assert pair.val1 == 42
+        assert pair.val2 == 58
+
+    def test_float_values(self):
+        """Test pair creation with float values."""
+        pair = PairCreate(val1=3.14, val2=2.71)
+        assert pair.val1 == 3.14
+        assert pair.val2 == 2.71
+
+
+class TestPairResponse:
+    """Tests for PairResponse model."""
+
+    def test_valid_pair_response(self):
+        """Test valid pair response."""
+        now = datetime.now(timezone.utc)
+        response = PairResponse(
+            pair_id="pair-123",
+            val1=42,
+            val2=58,
+            created_at=now,
+        )
+        assert response.pair_id == "pair-123"
+        assert response.val1 == 42
+        assert response.val2 == 58
+        assert response.created_at == now
+
+
+# --- Log Models ---
+
+
+class TestAgentStepOutput:
+    """Tests for AgentStepOutput model."""
+
+    def test_valid_agent_step(self):
+        """Test creating a valid agent step output."""
+        step = AgentStepOutput(
+            agent_name="orchestrator",
+            output={"plan": "test plan"},
+            duration_ms=150.5,
+        )
+        assert step.agent_name == "orchestrator"
+        assert step.output == {"plan": "test plan"}
+        assert step.duration_ms == 150.5
+
+
+class TestOperationLog:
+    """Tests for OperationLog model."""
+
+    def test_valid_operation_log(self):
+        """Test creating a valid operation log."""
+        now = datetime.now(timezone.utc)
+        log = OperationLog(
+            log_id="log-123",
+            pair_id="pair-123",
+            operation="add",
+            agent_steps=[
+                AgentStepOutput(
+                    agent_name="orchestrator",
+                    output={"plan": "test"},
+                    duration_ms=100.0,
+                ),
+                AgentStepOutput(
+                    agent_name="execution",
+                    output={"result": 100},
+                    duration_ms=50.0,
+                ),
+            ],
+            result=100,
+            success=True,
+            created_at=now,
+        )
+        assert log.log_id == "log-123"
+        assert log.pair_id == "pair-123"
+        assert log.operation == "add"
+        assert len(log.agent_steps) == 2
+        assert log.result == 100
+        assert log.success is True
+
+    def test_failed_operation_log(self):
+        """Test operation log for a failed operation."""
+        log = OperationLog(
+            log_id="log-456",
+            pair_id="pair-123",
+            operation="divide",
+            agent_steps=[],
+            result=None,
+            success=False,
+            created_at=datetime.now(timezone.utc),
+        )
+        assert log.success is False
+        assert log.result is None
+
+
+class TestOperateRequest:
+    """Tests for OperateRequest model."""
+
+    def test_valid_operate_request(self):
+        """Test valid operate request."""
+        request = OperateRequest(operation="add")
+        assert request.operation == "add"
+
+    def test_subtract_operation(self):
+        """Test subtract operation request."""
+        request = OperateRequest(operation="subtract")
+        assert request.operation == "subtract"
+
+
+class TestOperationLogResponse:
+    """Tests for OperationLogResponse model."""
+
+    def test_valid_operation_log_response(self):
+        """Test valid operation log response."""
+        now = datetime.now(timezone.utc)
+        response = OperationLogResponse(
+            log_id="log-123",
+            pair_id="pair-123",
+            operation="multiply",
+            agent_steps=[
+                AgentStepOutput(
+                    agent_name="orchestrator",
+                    output={"plan": "test"},
+                    duration_ms=100.0,
+                ),
+            ],
+            result=2436,
+            success=True,
+            created_at=now,
+        )
+        assert response.log_id == "log-123"
+        assert response.operation == "multiply"
+        assert response.result == 2436
+        assert response.success is True

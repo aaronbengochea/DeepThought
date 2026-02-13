@@ -167,7 +167,7 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 - [X] Add mypy overrides for `jose`, `bcrypt`, `dotenv`
 
 ### 3.9 Tests
-- `tests/unit/test_models.py` — add tests for all new models
+- [X] `tests/unit/test_models.py` — add tests for all new models (27 new tests, 54 total)
 
 ---
 
