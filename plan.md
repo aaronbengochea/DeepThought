@@ -85,34 +85,35 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 **Verify:** `pytest tests/unit/test_llm_provider.py` passes. `LLM_PROVIDER` env var no longer needed.
 
 ### 2.1 `src/deepthought/llm/provider.py`
-- Remove `LLMProvider` enum
-- Remove `_create_ollama_llm` and `_create_anthropic_llm` functions
-- Simplify `get_llm()` to always use `_create_google_llm` with `settings.google_api_key` and `settings.llm_model`
-- Remove `provider` parameter from `get_llm()`
+- [X] Remove `LLMProvider` enum
+- [X] Remove `_create_ollama_llm` and `_create_anthropic_llm` functions
+- [X] Simplify `get_llm()` to always use `_create_google_llm` with `settings.google_api_key` and `settings.llm_model`
+- [X] Remove `provider` parameter from `get_llm()`
 
 ### 2.2 `src/deepthought/llm/__init__.py`
-- Remove `LLMProvider` from exports
+- [X] Remove `LLMProvider` from exports
 
 ### 2.3 `src/deepthought/config/settings.py`
-- Remove: `llm_provider`, `ollama_base_url`, `anthropic_api_key`, `openai_api_key`, `cohere_api_key`, `groq_api_key`, `together_api_key`, `fireworks_api_key`
-- Change `llm_model` default to `"gemini-2.0-flash"`
-- Keep `google_api_key`
+- [X] Remove: `llm_provider`, `ollama_base_url`, `anthropic_api_key`, `openai_api_key`, `cohere_api_key`, `groq_api_key`, `together_api_key`, `fireworks_api_key`
+- [X] Keep `llm_model` as required env var (no default needed)
+- [X] Keep `google_api_key`
 
 ### 2.4 `.env.example`
-- Remove all provider-specific vars except `GOOGLE_API_KEY` and `LLM_MODEL`
-- Remove `LLM_PROVIDER`
+- [X] Remove all provider-specific vars except `GOOGLE_API_KEY` and `LLM_MODEL`
+- [X] Remove `LLM_PROVIDER`
 
 ### 2.5 Delete `scripts/setup_ollama.py`
+- [X] Already absent — never existed in this codebase
 
 ### 2.6 `docker-compose.yml`
-- Remove the `ollama:` service block and `ollama-models:` volume
+- [X] Remove the `ollama:` service block and `ollama-models:` volume
 
 ### 2.7 `pyproject.toml`
-- Remove `langchain-anthropic` and `langchain-ollama` from dependencies
-- Remove their mypy overrides
+- [X] Remove `langchain-anthropic` and `langchain-ollama` from dependencies
+- [X] Remove their mypy overrides
 
 ### 2.8 `tests/unit/test_llm_provider.py`
-- Rewrite: test Google creation, test missing API key error, remove all Ollama/Anthropic tests
+- [X] Rewrite: test Google creation, test missing API key error, remove all Ollama/Anthropic tests
 
 ---
 
