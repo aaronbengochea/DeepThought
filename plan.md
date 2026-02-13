@@ -136,10 +136,10 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 - [X] `PairResponse(BaseModel)` — pair_id, val1, val2, created_at
 
 ### 3.3 New file: `src/deepthought/models/logs.py`
-- `AgentStepOutput(BaseModel)` — agent_name, output (dict), duration_ms
-- `OperationLog(BaseModel)` — log_id, pair_id, operation, agent_steps (list[AgentStepOutput]), result, success, created_at
-- `OperateRequest(BaseModel)` — operation (str)
-- `OperationLogResponse(BaseModel)` — all OperationLog fields
+- [X] `AgentStepOutput(BaseModel)` — agent_name, output (dict), duration_ms
+- [X] `OperationLog(BaseModel)` — log_id, pair_id, operation, agent_steps (list[AgentStepOutput]), result, success, created_at
+- [X] `OperateRequest(BaseModel)` — operation (str)
+- [X] `OperationLogResponse(BaseModel)` — all OperationLog fields
 
 ### 3.4 `src/deepthought/models/__init__.py`
 - Export all new models
