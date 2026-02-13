@@ -12,8 +12,22 @@ from deepthought.models.agents import (
     VerificationStatus,
 )
 from deepthought.models.database import CalculationItem, DynamoDBItem
+from deepthought.models.logs import (
+    AgentStepOutput,
+    OperateRequest,
+    OperationLog,
+    OperationLogResponse,
+)
+from deepthought.models.pairs import Pair, PairCreate, PairResponse
 from deepthought.models.requests import TaskRequest
 from deepthought.models.responses import HealthResponse, TaskResponse
+from deepthought.models.users import (
+    AuthResponse,
+    User,
+    UserCreate,
+    UserResponse,
+    UserSignIn,
+)
 
 __all__ = [
     # Agent models
@@ -29,6 +43,21 @@ __all__ = [
     # Database models
     "DynamoDBItem",
     "CalculationItem",
+    # User models
+    "User",
+    "UserCreate",
+    "UserSignIn",
+    "UserResponse",
+    "AuthResponse",
+    # Pair models
+    "Pair",
+    "PairCreate",
+    "PairResponse",
+    # Log models
+    "AgentStepOutput",
+    "OperationLog",
+    "OperateRequest",
+    "OperationLogResponse",
     # Request/Response models
     "TaskRequest",
     "TaskResponse",

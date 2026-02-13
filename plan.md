@@ -142,7 +142,7 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 - [X] `OperationLogResponse(BaseModel)` — all OperationLog fields
 
 ### 3.4 `src/deepthought/models/__init__.py`
-- Export all new models
+- [X] Export all new models
 
 ### 3.5 `src/deepthought/config/settings.py`
 - Add: `dynamodb_users_table: str = "deepthought-users"`
