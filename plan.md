@@ -144,13 +144,14 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 ### 3.4 `src/deepthought/models/__init__.py`
 - [X] Export all new models
 
-### 3.5 `src/deepthought/config/settings.py`
-- Add: `dynamodb_users_table: str = "deepthought-users"`
-- Add: `dynamodb_pairs_table: str = "deepthought-pairs"`
-- Add: `dynamodb_logs_table: str = "deepthought-logs"`
-- Add: `jwt_secret_key: str = "change-this-secret-key-in-production"`
-- Add: `jwt_algorithm: str = "HS256"`
-- Add: `jwt_expiration_minutes: int = 1440`
+### 3.5 `src/deepthought/config/settings.py` + `.env.example` + `.env`
+- [X] Add: `dynamodb_users_table: str` (required env var, no default)
+- [X] Add: `dynamodb_pairs_table: str` (required env var, no default)
+- [X] Add: `dynamodb_logs_table: str` (required env var, no default)
+- [X] Add: `jwt_secret_key: str` (required env var, no default)
+- [X] Add: `jwt_algorithm: str = "HS256"`
+- [X] Add: `jwt_expiration_minutes: int = 1440`
+- [X] Add table names and JWT_SECRET_KEY to `.env.example` and `.env`
 
 ### 3.6 `src/deepthought/api/dependencies.py`
 - Add `get_users_db_client()`, `get_pairs_db_client()`, `get_logs_db_client()` — each returns a `DynamoDBClient` with the appropriate table name from settings

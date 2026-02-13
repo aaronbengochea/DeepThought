@@ -34,6 +34,16 @@ class Settings(BaseSettings):
     # Google Gemini
     google_api_key: str
 
+    # DynamoDB Tables
+    dynamodb_users_table: str
+    dynamodb_pairs_table: str
+    dynamodb_logs_table: str
+
+    # JWT
+    jwt_secret_key: str
+    jwt_algorithm: str = "HS256"
+    jwt_expiration_minutes: int = 1440
+
     # CORS
     cors_origins: list[str]
 
