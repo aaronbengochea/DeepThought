@@ -124,16 +124,16 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 **Verify:** `make database && make seed` creates all tables. Model tests pass.
 
 ### 3.1 New file: `src/deepthought/models/users.py`
-- `User(BaseModel)` — email, name, password_hash, created_at
-- `UserCreate(BaseModel)` — email, name, password (min_length=8)
-- `UserSignIn(BaseModel)` — email, password
-- `UserResponse(BaseModel)` — email, name, created_at
-- `AuthResponse(BaseModel)` — token, user (UserResponse)
+- [X] `User(BaseModel)` — email, name, password_hash, created_at
+- [X] `UserCreate(BaseModel)` — email, name, password (min_length=8)
+- [X] `UserSignIn(BaseModel)` — email, password
+- [X] `UserResponse(BaseModel)` — email, name, created_at
+- [X] `AuthResponse(BaseModel)` — token, user (UserResponse)
 
 ### 3.2 New file: `src/deepthought/models/pairs.py`
-- `Pair(BaseModel)` — pair_id, user_email, val1, val2, created_at
-- `PairCreate(BaseModel)` — val1, val2
-- `PairResponse(BaseModel)` — pair_id, val1, val2, created_at
+- [X] `Pair(BaseModel)` — pair_id, user_email, val1, val2, created_at
+- [X] `PairCreate(BaseModel)` — val1, val2
+- [X] `PairResponse(BaseModel)` — pair_id, val1, val2, created_at
 
 ### 3.3 New file: `src/deepthought/models/logs.py`
 - `AgentStepOutput(BaseModel)` — agent_name, output (dict), duration_ms
