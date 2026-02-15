@@ -190,9 +190,9 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 - [X] `GET /profile` — return current user (requires JWT via `get_current_user`)
 
 ### 4.3 New file: `src/deepthought/api/routes/pairs.py`
-- `POST /` — create pair (val1, val2 from body, user_email from JWT, uuid for pair_id, store in pairs table)
-- `GET /` — list all pairs for current user (query pairs table with pk=user_email)
-- `POST /{pair_id}/operate` — execute operation on pair:
+- [X] `POST /` — create pair (val1, val2 from body, user_email from JWT, uuid for pair_id, store in pairs table)
+- [X] `GET /` — list all pairs for current user (query pairs table with pk=user_email)
+- [X] `POST /{pair_id}/operate` — execute operation on pair:
   1. Fetch pair, verify ownership
   2. Invoke agent graph with `input_params: {val1, val2, operation}` (direct values, no DB query needed)
   3. Capture telemetry from `final_state` (plan, execution_result, verification_result, formatted_response as `AgentStepOutput` list)
@@ -203,9 +203,9 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 ### 4.4 Modify agent graph for direct value passing
 
 **Key change in `src/deepthought/agents/nodes/execution.py`:**
-- At the start of `execution_node`, check if `input_params` contains `val1` and `val2`
-- If present, set `db_item = {"val1": input_params["val1"], "val2": input_params["val2"]}` and skip the QUERY_DATABASE step
-- This is backward compatible — the old `/calculate` endpoint still passes pk/sk
+- [X] At the start of `execution_node`, check if `input_params` contains `val1` and `val2`
+- [X] If present, set `db_item = {"val1": input_params["val1"], "val2": input_params["val2"]}` and skip the QUERY_DATABASE step
+- [X] This is backward compatible — the old `/calculate` endpoint still passes pk/sk
 
 **Key change in `src/deepthought/agents/state.py`:**
 - Add `node_timings: dict[str, float]` to AgentState for per-node timing
@@ -226,6 +226,13 @@ Build `agent_steps` list from these, store in logs table.
 
 ### 4.6 `src/deepthought/api/app.py`
 - Register new routers: `auth.router` at `/api/v1/auth`, `pairs.router` at `/api/v1/pairs`
+
+### 4.6.1 Deprecation cleanup (after 4.6)
+- Remove `DYNAMODB_TABLE_NAME` env var from settings, `.env`, `.env.example`
+- Remove the old `/api/v1/tasks/calculate` endpoint and `routes/tasks.py`
+- Remove `get_db_client()` from `dependencies.py` (replaced by table-specific clients)
+- Remove `deepthought-calculations` table creation and seed data from `scripts/seed_data.py`
+- Update any tests that reference the old table or endpoint
 
 ### 4.7 `src/deepthought/core/exceptions.py`
 - Add `AuthenticationError`, `AuthorizationError`, `NotFoundError`
