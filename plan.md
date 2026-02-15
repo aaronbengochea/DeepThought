@@ -244,8 +244,8 @@ The `final_state` from `graph.ainvoke()` already contains:
 - [X] Add `AuthenticationError`, `AuthorizationError`, `NotFoundError`
 
 ### 4.8 Tests
-- New file: `tests/unit/test_auth.py` — password hashing, JWT creation/decoding, signup/signin endpoints
-- New file: `tests/unit/test_pairs.py` — pair CRUD, operate endpoint, logs retrieval
+- [X] New file: `tests/unit/test_auth.py` — password hashing, JWT creation/decoding, get_current_user (18 tests)
+- [X] New file: `tests/unit/test_pairs.py` — pair CRUD, operate endpoint, logs retrieval (11 tests)
 
 ---
 
