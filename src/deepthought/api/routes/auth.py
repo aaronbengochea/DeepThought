@@ -5,10 +5,10 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from deepthought.api.auth import create_access_token, hash_password
+from deepthought.api.auth import create_access_token, hash_password, verify_password
 from deepthought.api.dependencies import get_users_db_client
 from deepthought.db import DynamoDBClient
-from deepthought.models.users import AuthResponse, UserCreate, UserResponse
+from deepthought.models.users import AuthResponse, SignInResponse, UserCreate, UserResponse, UserSignIn
 
 router = APIRouter()
 
@@ -61,3 +61,39 @@ async def signup(
     )
 
     return AuthResponse(token=token, user=user_response)
+
+
+@router.post(
+    "/signin",
+    response_model=SignInResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Sign in to an existing account",
+    description="Authenticates a user with email and password. Returns a JWT token and email.",
+)
+async def signin(
+    request: UserSignIn,
+    users_db: DynamoDBClient = Depends(get_users_db_client),
+) -> SignInResponse:
+    """Sign in to an existing user account.
+
+    1. Look up the user by email in DynamoDB
+    2. Verify the password against the stored bcrypt hash
+    3. Generate a JWT token
+    4. Return the token and email
+    """
+    invalid_credentials = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid email or password",
+    )
+
+    user = await users_db.get_item(pk=request.email)
+    if user is None:
+        raise invalid_credentials
+
+    password_matches = verify_password(request.password, user["password_hash"])
+    if not password_matches:
+        raise invalid_credentials
+
+    token = create_access_token(data={"sub": request.email})
+
+    return SignInResponse(token=token, email=request.email)

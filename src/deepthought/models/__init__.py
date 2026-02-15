@@ -23,6 +23,7 @@ from deepthought.models.requests import TaskRequest
 from deepthought.models.responses import HealthResponse, TaskResponse
 from deepthought.models.users import (
     AuthResponse,
+    SignInResponse,
     User,
     UserCreate,
     UserResponse,
@@ -49,6 +50,7 @@ __all__ = [
     "UserSignIn",
     "UserResponse",
     "AuthResponse",
+    "SignInResponse",
     # Pair models
     "Pair",
     "PairCreate",

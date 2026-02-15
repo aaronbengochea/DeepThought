@@ -44,7 +44,14 @@ class UserResponse(BaseModel):
 
 
 class AuthResponse(BaseModel):
-    """Response model for authentication endpoints."""
+    """Response model for signup endpoint."""
 
     token: str = Field(..., description="JWT access token")
     user: UserResponse = Field(..., description="Authenticated user data")
+
+
+class SignInResponse(BaseModel):
+    """Response model for signin endpoint."""
+
+    token: str = Field(..., description="JWT access token")
+    email: EmailStr = Field(..., description="Authenticated user email")
