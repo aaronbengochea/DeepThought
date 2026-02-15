@@ -457,25 +457,15 @@ class TestUser:
         """Test creating a valid user."""
         now = datetime.now(timezone.utc)
         user = User(
-            email="test@example.com",
-            name="Test User",
+            first_name="Test",
+            last_name="User",
             password_hash="$2b$12$hashedpassword",
             created_at=now,
         )
-        assert user.email == "test@example.com"
-        assert user.name == "Test User"
+        assert user.first_name == "Test"
+        assert user.last_name == "User"
         assert user.password_hash == "$2b$12$hashedpassword"
         assert user.created_at == now
-
-    def test_invalid_email(self):
-        """Test user with invalid email is rejected."""
-        with pytest.raises(ValueError):
-            User(
-                email="not-an-email",
-                name="Test User",
-                password_hash="$2b$12$hashedpassword",
-                created_at=datetime.now(timezone.utc),
-            )
 
 
 class TestUserCreate:
@@ -485,11 +475,13 @@ class TestUserCreate:
         """Test valid user creation request."""
         user = UserCreate(
             email="test@example.com",
-            name="Test User",
+            first_name="Test",
+            last_name="User",
             password="password123",
         )
         assert user.email == "test@example.com"
-        assert user.name == "Test User"
+        assert user.first_name == "Test"
+        assert user.last_name == "User"
         assert user.password == "password123"
 
     def test_password_min_length(self):
@@ -497,16 +489,28 @@ class TestUserCreate:
         with pytest.raises(ValueError):
             UserCreate(
                 email="test@example.com",
-                name="Test User",
+                first_name="Test",
+                last_name="User",
                 password="short",
             )
 
-    def test_name_min_length(self):
-        """Test name must be at least 1 character."""
+    def test_first_name_min_length(self):
+        """Test first_name must be at least 1 character."""
         with pytest.raises(ValueError):
             UserCreate(
                 email="test@example.com",
-                name="",
+                first_name="",
+                last_name="User",
+                password="password123",
+            )
+
+    def test_last_name_min_length(self):
+        """Test last_name must be at least 1 character."""
+        with pytest.raises(ValueError):
+            UserCreate(
+                email="test@example.com",
+                first_name="Test",
+                last_name="",
                 password="password123",
             )
 
@@ -515,7 +519,8 @@ class TestUserCreate:
         with pytest.raises(ValueError):
             UserCreate(
                 email="bad-email",
-                name="Test User",
+                first_name="Test",
+                last_name="User",
                 password="password123",
             )
 
@@ -546,11 +551,13 @@ class TestUserResponse:
         now = datetime.now(timezone.utc)
         response = UserResponse(
             email="test@example.com",
-            name="Test User",
+            first_name="Test",
+            last_name="User",
             created_at=now,
         )
         assert response.email == "test@example.com"
-        assert response.name == "Test User"
+        assert response.first_name == "Test"
+        assert response.last_name == "User"
         assert response.created_at == now
 
 
@@ -564,12 +571,14 @@ class TestAuthResponse:
             token="jwt-token-here",
             user=UserResponse(
                 email="test@example.com",
-                name="Test User",
+                first_name="Test",
+                last_name="User",
                 created_at=now,
             ),
         )
         assert response.token == "jwt-token-here"
         assert response.user.email == "test@example.com"
+        assert response.user.first_name == "Test"
 
 
 # --- Pair Models ---

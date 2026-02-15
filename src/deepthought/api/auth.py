@@ -126,7 +126,7 @@ async def get_current_user(
     if email is None:
         raise credentials_exception
 
-    user = await users_db.get_item(pk=email, sk="PROFILE")
+    user = await users_db.get_item(pk=email)
     if user is None:
         raise credentials_exception
 

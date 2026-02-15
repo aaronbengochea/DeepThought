@@ -12,29 +12,32 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def get_table_names() -> list[str]:
-    """Get table names from environment variables."""
-    return [
-        os.environ["DYNAMODB_TABLE_NAME"],
-        os.environ["DYNAMODB_USERS_TABLE"],
-        os.environ["DYNAMODB_PAIRS_TABLE"],
-        os.environ["DYNAMODB_LOGS_TABLE"],
-    ]
 
+def create_table(
+    dynamodb_resource: boto3.resource,
+    table_name: str,
+    has_sort_key: bool = True,
+) -> None:
+    """Create a DynamoDB table if it doesn't exist.
 
-def create_table(dynamodb_resource: boto3.resource, table_name: str) -> None:
-    """Create a DynamoDB table if it doesn't exist."""
+    Args:
+        dynamodb_resource: The boto3 DynamoDB resource.
+        table_name: The name of the table to create.
+        has_sort_key: Whether the table uses a composite key (pk + sk).
+            If False, the table uses pk only.
+    """
+    key_schema = [{"AttributeName": "pk", "KeyType": "HASH"}]
+    attribute_definitions = [{"AttributeName": "pk", "AttributeType": "S"}]
+
+    if has_sort_key:
+        key_schema.append({"AttributeName": "sk", "KeyType": "RANGE"})
+        attribute_definitions.append({"AttributeName": "sk", "AttributeType": "S"})
+
     try:
         table = dynamodb_resource.create_table(
             TableName=table_name,
-            KeySchema=[
-                {"AttributeName": "pk", "KeyType": "HASH"},
-                {"AttributeName": "sk", "KeyType": "RANGE"},
-            ],
-            AttributeDefinitions=[
-                {"AttributeName": "pk", "AttributeType": "S"},
-                {"AttributeName": "sk", "AttributeType": "S"},
-            ],
+            KeySchema=key_schema,
+            AttributeDefinitions=attribute_definitions,
             BillingMode="PAY_PER_REQUEST",
         )
         table.wait_until_exists()
@@ -88,15 +91,14 @@ def seed_users(dynamodb_resource: boto3.resource) -> None:
 
     user = {
         "pk": "test@example.com",
-        "sk": "PROFILE",
-        "email": "test@example.com",
-        "name": "Test User",
+        "first_name": "Test",
+        "last_name": "User",
         "password_hash": os.environ["TEST_USER_PASSWORD_HASH"],
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
     table.put_item(Item=user)
-    print(f"Seeded user: {user['email']}")
+    print(f"Seeded user: {user['pk']}")
 
 
 def seed_pairs(dynamodb_resource: boto3.resource) -> None:
@@ -146,9 +148,17 @@ def main() -> None:
 
     print(f"Connecting to local DynamoDB at {endpoint_url}")
 
-    # Create all tables
-    for table_name in get_table_names():
-        create_table(dynamodb, table_name)
+    # Create tables with composite keys (pk + sk)
+    composite_key_tables = [
+        os.environ["DYNAMODB_TABLE_NAME"],
+        os.environ["DYNAMODB_PAIRS_TABLE"],
+        os.environ["DYNAMODB_LOGS_TABLE"],
+    ]
+    for table_name in composite_key_tables:
+        create_table(dynamodb, table_name, has_sort_key=True)
+
+    # Create users table with pk only (email is the partition key)
+    create_table(dynamodb, os.environ["DYNAMODB_USERS_TABLE"], has_sort_key=False)
 
     # Seed data
     seed_calculations(dynamodb)

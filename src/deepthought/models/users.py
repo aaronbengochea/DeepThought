@@ -6,10 +6,14 @@ from pydantic import BaseModel, EmailStr, Field
 
 
 class User(BaseModel):
-    """Full user model as stored in DynamoDB."""
+    """Full user model as stored in DynamoDB.
 
-    email: EmailStr = Field(..., description="User email address")
-    name: str = Field(..., description="User display name")
+    The user's email serves as the partition key (pk) in DynamoDB,
+    so it is not stored as a separate field.
+    """
+
+    first_name: str = Field(..., description="User first name")
+    last_name: str = Field(..., description="User last name")
     password_hash: str = Field(..., description="Bcrypt password hash")
     created_at: datetime = Field(..., description="Account creation timestamp")
 
@@ -18,7 +22,8 @@ class UserCreate(BaseModel):
     """Request model for user registration."""
 
     email: EmailStr = Field(..., description="User email address")
-    name: str = Field(..., min_length=1, description="User display name")
+    first_name: str = Field(..., min_length=1, description="User first name")
+    last_name: str = Field(..., min_length=1, description="User last name")
     password: str = Field(..., min_length=8, description="User password")
 
 
@@ -33,7 +38,8 @@ class UserResponse(BaseModel):
     """Response model for user data (no sensitive fields)."""
 
     email: EmailStr = Field(..., description="User email address")
-    name: str = Field(..., description="User display name")
+    first_name: str = Field(..., description="User first name")
+    last_name: str = Field(..., description="User last name")
     created_at: datetime = Field(..., description="Account creation timestamp")
 
 

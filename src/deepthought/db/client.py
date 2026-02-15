@@ -22,13 +22,13 @@ class DynamoDBClient:
         self.endpoint_url = endpoint_url
         self._session = aioboto3.Session()
 
-    async def get_item(self, pk: str, sk: str) -> dict[str, Any] | None:
+    async def get_item(self, pk: str, sk: str | None = None) -> dict[str, Any] | None:
         """
         Get an item from DynamoDB by primary key.
 
         Args:
             pk: Partition key value
-            sk: Sort key value
+            sk: Sort key value (optional for pk-only tables)
 
         Returns:
             The item if found, None otherwise.
@@ -43,7 +43,10 @@ class DynamoDBClient:
                 endpoint_url=self.endpoint_url,
             ) as dynamodb:
                 table = await dynamodb.Table(self.table_name)
-                response = await table.get_item(Key={"pk": pk, "sk": sk})
+                key: dict[str, str] = {"pk": pk}
+                if sk is not None:
+                    key["sk"] = sk
+                response = await table.get_item(Key=key)
                 return response.get("Item")
         except ClientError as e:
             raise DatabaseError(f"Failed to get item: {e}") from e
@@ -53,7 +56,7 @@ class DynamoDBClient:
         Put an item into DynamoDB.
 
         Args:
-            item: The item to put (must include pk and sk).
+            item: The item to put (must include pk, and sk if the table uses a composite key).
 
         Raises:
             DatabaseError: If the operation fails.
