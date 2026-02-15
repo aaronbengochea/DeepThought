@@ -1,5 +1,5 @@
 """API route modules for DeepThought."""
 
-from deepthought.api.routes import health, tasks
+from deepthought.api.routes import auth, health, pairs
 
-__all__ = ["health", "tasks"]
+__all__ = ["auth", "health", "pairs"]

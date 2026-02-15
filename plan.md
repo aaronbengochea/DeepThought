@@ -229,11 +229,16 @@ The `final_state` from `graph.ainvoke()` already contains:
 - [X] Register new routers: `auth.router` at `/api/v1/auth`, `pairs.router` at `/api/v1/pairs`
 
 ### 4.6.1 Deprecation cleanup (after 4.6)
-- Remove `DYNAMODB_TABLE_NAME` env var from settings, `.env`, `.env.example`
-- Remove the old `/api/v1/tasks/calculate` endpoint and `routes/tasks.py`
-- Remove `get_db_client()` from `dependencies.py` (replaced by table-specific clients)
-- Remove `deepthought-calculations` table creation and seed data from `scripts/seed_data.py`
-- Update any tests that reference the old table or endpoint
+- [X] Remove `DYNAMODB_TABLE_NAME` env var from settings, `.env`, `.env.example`
+- [X] Remove the old `/api/v1/tasks/calculate` endpoint and `routes/tasks.py`
+- [X] Remove `get_dynamodb_client()` from `dependencies.py` (replaced by table-specific clients)
+- [X] Remove `deepthought-calculations` table creation and seed data from `scripts/seed_data.py`
+- [X] Remove `TaskRequest`, `TaskResponse`, `CalculationItem` models and their tests
+- [X] Update `models/__init__.py`, `models/responses.py`, `models/database.py`
+- [X] Update `routes/__init__.py` and `app.py` to remove tasks router
+- [X] Update `query_dynamodb` tool to use pairs table
+- [X] Update `CLAUDE.md` with new request flow, DynamoDB schema, and env vars
+- [X] Add `node_timings` to test helper base state
 
 ### 4.7 `src/deepthought/core/exceptions.py`
 - Add `AuthenticationError`, `AuthorizationError`, `NotFoundError`

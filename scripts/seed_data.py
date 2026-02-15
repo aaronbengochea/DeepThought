@@ -49,42 +49,6 @@ def create_table(
             raise
 
 
-def seed_calculations(dynamodb_resource: boto3.resource) -> None:
-    """Seed test calculation items."""
-    table = dynamodb_resource.Table(os.environ["DYNAMODB_TABLE_NAME"])
-
-    items = [
-        {
-            "pk": "CALC#test",
-            "sk": "ITEM#001",
-            "val1": 42,
-            "val2": 58,
-            "description": "Test calculation 1",
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        },
-        {
-            "pk": "CALC#test",
-            "sk": "ITEM#002",
-            "val1": 100,
-            "val2": 200,
-            "description": "Test calculation 2",
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        },
-        {
-            "pk": "CALC#user123",
-            "sk": "ITEM#calc001",
-            "val1": 15,
-            "val2": 25,
-            "description": "User calculation",
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        },
-    ]
-
-    for item in items:
-        table.put_item(Item=item)
-        print(f"Seeded calculation: {item['pk']}/{item['sk']}")
-
-
 def seed_users(dynamodb_resource: boto3.resource) -> None:
     """Seed a test user."""
     table = dynamodb_resource.Table(os.environ["DYNAMODB_USERS_TABLE"])
@@ -149,7 +113,6 @@ def main() -> None:
 
     # Create tables with composite keys (pk + sk)
     composite_key_tables = [
-        os.environ["DYNAMODB_TABLE_NAME"],
         os.environ["DYNAMODB_PAIRS_TABLE"],
         os.environ["DYNAMODB_LOGS_TABLE"],
     ]
@@ -160,7 +123,6 @@ def main() -> None:
     create_table(dynamodb, os.environ["DYNAMODB_USERS_TABLE"], has_sort_key=False)
 
     # Seed data
-    seed_calculations(dynamodb)
     seed_users(dynamodb)
     seed_pairs(dynamodb)
 

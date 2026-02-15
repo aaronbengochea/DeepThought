@@ -24,7 +24,6 @@ class Settings(BaseSettings):
     aws_secret_access_key: str
 
     # DynamoDB
-    dynamodb_table_name: str = "deepthought-calculations"
     dynamodb_endpoint_url: str
     dc_dynamodb_endpoint: str
 

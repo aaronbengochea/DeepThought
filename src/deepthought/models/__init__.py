@@ -11,7 +11,7 @@ from deepthought.models.agents import (
     VerificationResult,
     VerificationStatus,
 )
-from deepthought.models.database import CalculationItem, DynamoDBItem
+from deepthought.models.database import DynamoDBItem
 from deepthought.models.logs import (
     AgentStepOutput,
     OperateRequest,
@@ -19,8 +19,7 @@ from deepthought.models.logs import (
     OperationLogResponse,
 )
 from deepthought.models.pairs import Pair, PairCreate, PairResponse
-from deepthought.models.requests import TaskRequest
-from deepthought.models.responses import HealthResponse, TaskResponse
+from deepthought.models.responses import HealthResponse
 from deepthought.models.users import (
     AuthResponse,
     SignInResponse,
@@ -43,7 +42,6 @@ __all__ = [
     "FormattedResponse",
     # Database models
     "DynamoDBItem",
-    "CalculationItem",
     # User models
     "User",
     "UserCreate",
@@ -60,8 +58,6 @@ __all__ = [
     "OperationLog",
     "OperateRequest",
     "OperationLogResponse",
-    # Request/Response models
-    "TaskRequest",
-    "TaskResponse",
+    # Response models
     "HealthResponse",
 ]

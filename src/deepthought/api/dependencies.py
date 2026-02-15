@@ -16,17 +16,6 @@ def get_agent_graph() -> CompiledStateGraph:
     return compile_graph()
 
 
-def get_dynamodb_client() -> Generator[DynamoDBClient, None, None]:
-    """Dependency to get DynamoDB client."""
-    settings = get_settings()
-    client = DynamoDBClient(
-        table_name=settings.dynamodb_table_name,
-        region=settings.aws_region,
-        endpoint_url=settings.dynamodb_endpoint_url,
-    )
-    yield client
-
-
 def get_users_db_client() -> Generator[DynamoDBClient, None, None]:
     """Dependency to get DynamoDB client for the users table."""
     settings = get_settings()

@@ -15,7 +15,7 @@ from deepthought.models.agents import (
     VerificationResult,
     VerificationStatus,
 )
-from deepthought.models.database import CalculationItem, DynamoDBItem
+from deepthought.models.database import DynamoDBItem
 from deepthought.models.logs import (
     AgentStepOutput,
     OperateRequest,
@@ -23,8 +23,7 @@ from deepthought.models.logs import (
     OperationLogResponse,
 )
 from deepthought.models.pairs import Pair, PairCreate, PairResponse
-from deepthought.models.requests import TaskRequest
-from deepthought.models.responses import HealthResponse, TaskResponse
+from deepthought.models.responses import HealthResponse
 from deepthought.models.users import AuthResponse, User, UserCreate, UserResponse, UserSignIn
 
 
@@ -327,109 +326,6 @@ class TestDynamoDBItem:
         """Test extra fields are allowed."""
         item = DynamoDBItem(pk="TEST#123", sk="ITEM#001", extra_field="value")
         assert item.model_extra.get("extra_field") == "value"
-
-
-class TestCalculationItem:
-    """Tests for CalculationItem model."""
-
-    def test_valid_calculation_item(self):
-        """Test valid calculation item."""
-        item = CalculationItem(
-            pk="CALC#user123",
-            sk="ITEM#calc001",
-            val1=42,
-            val2=58,
-            created_at="2024-01-01T00:00:00Z",
-        )
-        assert item.pk == "CALC#user123"
-        assert item.sk == "ITEM#calc001"
-        assert item.val1 == 42
-        assert item.val2 == 58
-
-    def test_pk_pattern_validation(self):
-        """Test pk must match CALC# pattern."""
-        with pytest.raises(ValueError):
-            CalculationItem(
-                pk="INVALID#user123",  # Should start with CALC#
-                sk="ITEM#calc001",
-                val1=42,
-                val2=58,
-                created_at="2024-01-01T00:00:00Z",
-            )
-
-    def test_sk_pattern_validation(self):
-        """Test sk must match ITEM# pattern."""
-        with pytest.raises(ValueError):
-            CalculationItem(
-                pk="CALC#user123",
-                sk="INVALID#calc001",  # Should start with ITEM#
-                val1=42,
-                val2=58,
-                created_at="2024-01-01T00:00:00Z",
-            )
-
-    def test_optional_description(self):
-        """Test description is optional."""
-        item = CalculationItem(
-            pk="CALC#user123",
-            sk="ITEM#calc001",
-            val1=42,
-            val2=58,
-            description="Test calculation",
-            created_at="2024-01-01T00:00:00Z",
-        )
-        assert item.description == "Test calculation"
-
-
-class TestTaskRequest:
-    """Tests for TaskRequest model."""
-
-    def test_valid_task_request(self):
-        """Test valid task request."""
-        request = TaskRequest(
-            partition_key="CALC#test",
-            sort_key="ITEM#001",
-        )
-        assert request.partition_key == "CALC#test"
-        assert request.sort_key == "ITEM#001"
-        assert request.operation == "add"  # Default value
-
-    def test_custom_operation(self):
-        """Test task request with custom operation."""
-        request = TaskRequest(
-            partition_key="CALC#test",
-            sort_key="ITEM#001",
-            operation="multiply",
-        )
-        assert request.operation == "multiply"
-
-
-class TestTaskResponse:
-    """Tests for TaskResponse model."""
-
-    def test_success_response(self):
-        """Test successful task response."""
-        response = TaskResponse(
-            success=True,
-            request_id="test-123",
-            data={"val1": 42, "val2": 58, "result": 100},
-            execution_summary={"steps_executed": 2},
-        )
-        assert response.success is True
-        assert response.request_id == "test-123"
-        assert response.errors is None
-
-    def test_error_response(self):
-        """Test error task response."""
-        response = TaskResponse(
-            success=False,
-            request_id="test-123",
-            data={},
-            execution_summary={},
-            errors=["Database connection failed"],
-        )
-        assert response.success is False
-        assert response.errors == ["Database connection failed"]
 
 
 class TestHealthResponse:

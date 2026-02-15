@@ -33,6 +33,7 @@ def create_base_state(**overrides) -> AgentState:
         "verification_result": None,
         "formatted_response": None,
         "messages": [],
+        "node_timings": {},
         "current_step": "init",
         "error": None,
         "should_retry": False,

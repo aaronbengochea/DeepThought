@@ -22,15 +22,15 @@ async def query_dynamodb(pk: str, sk: str) -> dict[str, Any] | None:
     Query DynamoDB for an item by primary key.
 
     Args:
-        pk: Partition key (e.g., "CALC#user123")
-        sk: Sort key (e.g., "ITEM#calc001")
+        pk: Partition key
+        sk: Sort key
 
     Returns:
         The item if found, None otherwise.
     """
     settings = get_settings()
     client = DynamoDBClient(
-        table_name=settings.dynamodb_table_name,
+        table_name=settings.dynamodb_pairs_table,
         region=settings.aws_region,
         endpoint_url=settings.dynamodb_endpoint_url,
     )
