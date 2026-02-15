@@ -105,21 +105,20 @@ def seed_pairs(dynamodb_resource: boto3.resource) -> None:
     """Seed two test pairs for the test user."""
     table = dynamodb_resource.Table(os.environ["DYNAMODB_PAIRS_TABLE"])
 
+    pair_id_1 = str(uuid.uuid4())
+    pair_id_2 = str(uuid.uuid4())
+
     pairs = [
         {
             "pk": "test@example.com",
-            "sk": f"PAIR#{uuid.uuid4()}",
-            "pair_id": str(uuid.uuid4()),
-            "user_email": "test@example.com",
+            "sk": pair_id_1,
             "val1": 42,
             "val2": 58,
             "created_at": datetime.now(timezone.utc).isoformat(),
         },
         {
             "pk": "test@example.com",
-            "sk": f"PAIR#{uuid.uuid4()}",
-            "pair_id": str(uuid.uuid4()),
-            "user_email": "test@example.com",
+            "sk": pair_id_2,
             "val1": 100,
             "val2": 200,
             "created_at": datetime.now(timezone.utc).isoformat(),
@@ -128,7 +127,7 @@ def seed_pairs(dynamodb_resource: boto3.resource) -> None:
 
     for pair in pairs:
         table.put_item(Item=pair)
-        print(f"Seeded pair: {pair['pair_id']} (val1={pair['val1']}, val2={pair['val2']})")
+        print(f"Seeded pair: {pair['sk']} (val1={pair['val1']}, val2={pair['val2']})")
 
 
 def main() -> None:

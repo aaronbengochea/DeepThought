@@ -591,14 +591,10 @@ class TestPair:
         """Test creating a valid pair."""
         now = datetime.now(timezone.utc)
         pair = Pair(
-            pair_id="pair-123",
-            user_email="test@example.com",
             val1=42,
             val2=58,
             created_at=now,
         )
-        assert pair.pair_id == "pair-123"
-        assert pair.user_email == "test@example.com"
         assert pair.val1 == 42
         assert pair.val2 == 58
         assert pair.created_at == now
@@ -606,8 +602,6 @@ class TestPair:
     def test_float_values(self):
         """Test pair with float values."""
         pair = Pair(
-            pair_id="pair-123",
-            user_email="test@example.com",
             val1=3.14,
             val2=2.71,
             created_at=datetime.now(timezone.utc),
