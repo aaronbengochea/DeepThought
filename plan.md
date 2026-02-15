@@ -241,7 +241,7 @@ The `final_state` from `graph.ainvoke()` already contains:
 - [X] Add `node_timings` to test helper base state
 
 ### 4.7 `src/deepthought/core/exceptions.py`
-- Add `AuthenticationError`, `AuthorizationError`, `NotFoundError`
+- [X] Add `AuthenticationError`, `AuthorizationError`, `NotFoundError`
 
 ### 4.8 Tests
 - New file: `tests/unit/test_auth.py` — password hashing, JWT creation/decoding, signup/signin endpoints

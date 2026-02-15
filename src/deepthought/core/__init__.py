@@ -2,8 +2,11 @@
 
 from deepthought.core.exceptions import (
     AgentExecutionError,
+    AuthenticationError,
+    AuthorizationError,
     DatabaseError,
     DeepThoughtError,
+    NotFoundError,
     ToolExecutionError,
     VerificationError,
 )
@@ -14,4 +17,7 @@ __all__ = [
     "ToolExecutionError",
     "VerificationError",
     "DatabaseError",
+    "AuthenticationError",
+    "AuthorizationError",
+    "NotFoundError",
 ]
