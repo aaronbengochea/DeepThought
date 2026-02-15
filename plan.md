@@ -198,7 +198,7 @@ This plan transforms DeepThought into a full-stack application called **Operate+
   3. Capture telemetry from `final_state` (plan, execution_result, verification_result, formatted_response as `AgentStepOutput` list)
   4. Store log in logs table (pk=pair_id, sk=`OP#{timestamp}#{uuid}`)
   5. Return `OperationLogResponse` with all agent steps
-- `GET /{pair_id}/logs` — get all operation logs for a pair (verify pair ownership, query logs table)
+- [X] `GET /{pair_id}/logs` — get all operation logs for a pair (verify pair ownership, query logs table)
 
 ### 4.4 Modify agent graph for direct value passing
 

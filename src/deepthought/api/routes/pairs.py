@@ -224,3 +224,56 @@ async def operate_on_pair(
         success=success,
         created_at=now,
     )
+
+
+@router.get(
+    "/{pair_id}/logs",
+    response_model=list[OperationLogResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Get operation logs for a pair",
+    description="Returns all operation logs for a specific pair. Verifies pair ownership first.",
+)
+async def get_pair_logs(
+    pair_id: str,
+    current_user: dict[str, Any] = Depends(get_current_user),
+    pairs_db: DynamoDBClient = Depends(get_pairs_db_client),
+    logs_db: DynamoDBClient = Depends(get_logs_db_client),
+) -> list[OperationLogResponse]:
+    """Get all operation logs for a pair.
+
+    1. Verify the pair exists and belongs to the current user
+    2. Query the logs table with pk=pair_id
+    3. Return all logs sorted by timestamp (newest first)
+    """
+    user_email = current_user["pk"]
+
+    # Verify pair ownership
+    pair = await pairs_db.get_item(pk=user_email, sk=pair_id)
+    if pair is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Pair not found",
+        )
+
+    # Query logs for this pair
+    items = await logs_db.query(pk=pair_id)
+
+    logs = [
+        OperationLogResponse(
+            log_id=item["log_id"],
+            pair_id=item["pair_id"],
+            operation=item["operation"],
+            agent_steps=[
+                AgentStepOutput(**step) for step in item["agent_steps"]
+            ],
+            result=item.get("result"),
+            success=item["success"],
+            created_at=item["created_at"],
+        )
+        for item in items
+    ]
+
+    # Return newest first (sk is OP#{timestamp}#{uuid}, so reverse sort)
+    logs.reverse()
+
+    return logs
