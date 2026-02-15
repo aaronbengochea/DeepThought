@@ -5,10 +5,21 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from deepthought.api.auth import create_access_token, hash_password, verify_password
+from deepthought.api.auth import (
+    create_access_token,
+    get_current_user,
+    hash_password,
+    verify_password,
+)
 from deepthought.api.dependencies import get_users_db_client
 from deepthought.db import DynamoDBClient
-from deepthought.models.users import AuthResponse, SignInResponse, UserCreate, UserResponse, UserSignIn
+from deepthought.models.users import (
+    AuthResponse,
+    SignInResponse,
+    UserCreate,
+    UserResponse,
+    UserSignIn,
+)
 
 router = APIRouter()
 
@@ -97,3 +108,27 @@ async def signin(
     token = create_access_token(data={"sub": request.email})
 
     return SignInResponse(token=token, email=request.email)
+
+
+@router.get(
+    "/profile",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get current user profile",
+    description="Returns the authenticated user's profile. Requires a valid JWT in the Authorization header.",
+)
+async def get_me(
+    current_user: dict[str, Any] = Depends(get_current_user),
+) -> UserResponse:
+    """Return the current authenticated user's profile.
+
+    The JWT is decoded by the get_current_user dependency, which
+    fetches the full user record from DynamoDB. This endpoint
+    formats and returns the non-sensitive fields.
+    """
+    return UserResponse(
+        email=current_user["pk"],
+        first_name=current_user["first_name"],
+        last_name=current_user["last_name"],
+        created_at=current_user["created_at"],
+    )
