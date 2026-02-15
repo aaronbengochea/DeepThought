@@ -208,21 +208,21 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 - [X] This is backward compatible — the old `/calculate` endpoint still passes pk/sk
 
 **Key change in `src/deepthought/agents/state.py`:**
-- Add `node_timings: dict[str, float]` to AgentState for per-node timing
+- Add `node_timings: dict[str, float]` to AgentState for per-node timing (deferred — using total_duration_ms for now)
 
 **Timing instrumentation in each node:**
-- Record `time.perf_counter()` at node start/end
+- Record `time.perf_counter()` at node start/end (deferred — per-node timing is a future enhancement)
 - Return `node_timings` with the node's duration in the state update
 
 ### 4.5 Telemetry capture in `/operate` endpoint
 The `final_state` from `graph.ainvoke()` already contains:
-- `final_state["plan"]` → Plan model (`.model_dump()` for serialization)
-- `final_state["execution_result"]` → ExecutionResult model
-- `final_state["verification_result"]` → VerificationResult model
-- `final_state["formatted_response"]` → FormattedResponse model
-- `final_state["node_timings"]` → per-node durations
+- [X] `final_state["plan"]` → Plan model (`.model_dump()` for serialization)
+- [X] `final_state["execution_result"]` → ExecutionResult model
+- [X] `final_state["verification_result"]` → VerificationResult model
+- [X] `final_state["formatted_response"]` → FormattedResponse model
+- `final_state["node_timings"]` → per-node durations (deferred — total_duration_ms captured instead)
 
-Build `agent_steps` list from these, store in logs table.
+[X] Build `agent_steps` list from these, store in logs table.
 
 ### 4.6 `src/deepthought/api/app.py`
 - Register new routers: `auth.router` at `/api/v1/auth`, `pairs.router` at `/api/v1/pairs`
