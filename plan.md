@@ -178,11 +178,11 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 **Verify:** `pytest tests/` passes. Manual test via `/docs` Swagger UI.
 
 ### 4.1 New file: `src/deepthought/api/auth.py`
-- `hash_password(password) -> str` using bcrypt
-- `verify_password(password, hash) -> bool` using bcrypt
-- `create_access_token(data: dict) -> str` using python-jose (HS256, settings.jwt_secret_key)
-- `decode_access_token(token) -> dict` using python-jose
-- `get_current_user(token = Depends(OAuth2PasswordBearer))` — FastAPI dependency that decodes JWT, queries users table, returns user dict
+- [X] `hash_password(password) -> str` using bcrypt
+- [X] `verify_password(password, hash) -> bool` using bcrypt
+- [X] `create_access_token(data: dict) -> str` using python-jose (HS256, settings.jwt_secret_key)
+- [X] `decode_access_token(token) -> dict` using python-jose
+- [X] `get_current_user(token = Depends(OAuth2PasswordBearer))` — FastAPI dependency that decodes JWT, queries users table, returns user dict
 
 ### 4.2 New file: `src/deepthought/api/routes/auth.py`
 - `POST /signup` — check if user exists, hash password, store in users table, return JWT + user
