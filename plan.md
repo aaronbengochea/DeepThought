@@ -185,9 +185,9 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 - [X] `get_current_user(token = Depends(OAuth2PasswordBearer))` — FastAPI dependency that decodes JWT, queries users table, returns user dict
 
 ### 4.2 New file: `src/deepthought/api/routes/auth.py`
-- `POST /signup` — check if user exists, hash password, store in users table, return JWT + user
-- `POST /signin` — verify credentials, return JWT + user
-- `GET /me` — return current user (requires JWT via `get_current_user`)
+- [X] `POST /signup` — check if user exists, hash password, store in users table, return JWT + user
+- [X] `POST /signin` — verify credentials, return SignInResponse (token + email)
+- [X] `GET /profile` — return current user (requires JWT via `get_current_user`)
 
 ### 4.3 New file: `src/deepthought/api/routes/pairs.py`
 - `POST /` — create pair (val1, val2 from body, user_email from JWT, uuid for pair_id, store in pairs table)
