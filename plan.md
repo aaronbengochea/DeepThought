@@ -225,7 +225,7 @@ The `final_state` from `graph.ainvoke()` already contains:
 [X] Build `agent_steps` list from these, store in logs table.
 
 ### 4.6 `src/deepthought/api/app.py`
-- Register new routers: `auth.router` at `/api/v1/auth`, `pairs.router` at `/api/v1/pairs`
+- [X] Register new routers: `auth.router` at `/api/v1/auth`, `pairs.router` at `/api/v1/pairs`
 
 ### 4.6.1 Deprecation cleanup (after 4.6)
 - Remove `DYNAMODB_TABLE_NAME` env var from settings, `.env`, `.env.example`
