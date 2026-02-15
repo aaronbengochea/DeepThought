@@ -48,6 +48,7 @@ async def execute_calculation_task(
         "verification_result": None,
         "formatted_response": None,
         "messages": [],
+        "node_timings": {},
         "current_step": "start",
         "error": None,
         "should_retry": False,

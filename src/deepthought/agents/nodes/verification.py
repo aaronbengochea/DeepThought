@@ -1,6 +1,7 @@
 """Verification agent node - verifies execution results are correct."""
 
 import logging
+import time
 from typing import Any
 
 from langchain_core.messages import AIMessage
@@ -48,14 +49,18 @@ async def verification_node(state: AgentState) -> dict[str, Any]:
     Returns:
         Updated state with verification results.
     """
+    node_start_time = time.perf_counter()
+
     execution_result = state.get("execution_result")
     plan = state.get("plan")
 
     if execution_result is None or plan is None:
+        duration_ms = (time.perf_counter() - node_start_time) * 1000
         return {
             "verification_result": None,
             "error": "Missing execution result or plan for verification",
             "current_step": "verification_failed",
+            "node_timings": {"verification": duration_ms},
         }
 
     checks: list[VerificationCheck] = []
@@ -170,8 +175,10 @@ async def verification_node(state: AgentState) -> dict[str, Any]:
         reasoning=f"All {operation} checks passed" if all_passed else "One or more checks failed",
     )
 
+    duration_ms = (time.perf_counter() - node_start_time) * 1000
     return {
         "verification_result": verification_result,
         "current_step": "verification_complete",
+        "node_timings": {"verification": duration_ms},
         "messages": [AIMessage(content=f"Verification {overall_status.value} for {operation}")],
     }

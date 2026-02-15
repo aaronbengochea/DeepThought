@@ -2,6 +2,7 @@
 
 import json
 import logging
+import time
 from datetime import datetime, timezone
 from typing import Any
 
@@ -174,6 +175,7 @@ async def orchestrator_node(state: AgentState) -> dict[str, Any]:
     Returns:
         Updated state with the generated plan.
     """
+    start_time = time.perf_counter()
     input_params = state["input_params"]
 
     # Build the user message with task details
@@ -203,9 +205,11 @@ Please create an execution plan for this calculation task.
         # Parse the LLM response into a Plan
         plan = _parse_llm_plan(response_text, state)
 
+        duration_ms = (time.perf_counter() - start_time) * 1000
         return {
             "plan": plan,
             "current_step": "orchestrator_complete",
+            "node_timings": {"orchestrator": duration_ms},
             "messages": [AIMessage(content=f"Created plan with {len(plan.steps)} steps for {input_params.get('operation', 'add')} operation")],
         }
 
@@ -215,8 +219,10 @@ Please create an execution plan for this calculation task.
         # Use fallback plan if LLM fails
         plan = _create_fallback_plan(state)
 
+        duration_ms = (time.perf_counter() - start_time) * 1000
         return {
             "plan": plan,
             "current_step": "orchestrator_complete",
+            "node_timings": {"orchestrator": duration_ms},
             "messages": [AIMessage(content=f"Created fallback plan with {len(plan.steps)} steps (LLM unavailable)")],
         }

@@ -138,6 +138,7 @@ async def operate_on_pair(
         "verification_result": None,
         "formatted_response": None,
         "messages": [],
+        "node_timings": {},
         "current_step": "start",
         "error": None,
         "should_retry": False,
@@ -155,15 +156,16 @@ async def operate_on_pair(
         ) from e
     total_duration_ms = (time.perf_counter() - start_time) * 1000
 
-    # Build agent steps from final state
+    # Build agent steps from final state with per-node timing
     agent_steps: list[AgentStepOutput] = []
+    node_timings: dict[str, float] = final_state.get("node_timings", {})
 
     plan = final_state.get("plan")
     if plan is not None:
         agent_steps.append(AgentStepOutput(
             agent_name="orchestrator",
             output=plan.model_dump(mode="json"),
-            duration_ms=0.0,
+            duration_ms=node_timings.get("orchestrator", 0.0),
         ))
 
     execution_result = final_state.get("execution_result")
@@ -171,7 +173,7 @@ async def operate_on_pair(
         agent_steps.append(AgentStepOutput(
             agent_name="execution",
             output=execution_result.model_dump(mode="json"),
-            duration_ms=0.0,
+            duration_ms=node_timings.get("execution", 0.0),
         ))
 
     verification_result = final_state.get("verification_result")
@@ -179,7 +181,7 @@ async def operate_on_pair(
         agent_steps.append(AgentStepOutput(
             agent_name="verification",
             output=verification_result.model_dump(mode="json"),
-            duration_ms=0.0,
+            duration_ms=node_timings.get("verification", 0.0),
         ))
 
     formatted_response = final_state.get("formatted_response")
@@ -187,7 +189,7 @@ async def operate_on_pair(
         agent_steps.append(AgentStepOutput(
             agent_name="response",
             output=formatted_response.model_dump(mode="json"),
-            duration_ms=0.0,
+            duration_ms=node_timings.get("response", 0.0),
         ))
 
     # Determine result and success

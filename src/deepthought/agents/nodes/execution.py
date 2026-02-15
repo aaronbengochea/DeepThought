@@ -51,12 +51,16 @@ async def execution_node(state: AgentState) -> dict[str, Any]:
     Returns:
         Updated state with execution results.
     """
+    node_start_time = time.perf_counter()
+
     plan = state.get("plan")
     if plan is None:
+        duration_ms = (time.perf_counter() - node_start_time) * 1000
         return {
             "execution_result": None,
             "error": "No plan available for execution",
             "current_step": "execution_failed",
+            "node_timings": {"execution": duration_ms},
         }
 
     tool_results: list[ToolCallResult] = []
@@ -175,8 +179,10 @@ async def execution_node(state: AgentState) -> dict[str, Any]:
         success=all(tr.success for tr in tool_results) and len(tool_results) > 0,
     )
 
+    duration_ms = (time.perf_counter() - node_start_time) * 1000
     return {
         "execution_result": execution_result,
         "current_step": "execution_complete",
+        "node_timings": {"execution": duration_ms},
         "messages": [AIMessage(content=f"Executed {len(tool_results)} tools, operation: {operation}, result: {final_value}")],
     }

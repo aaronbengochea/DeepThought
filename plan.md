@@ -207,12 +207,13 @@ This plan transforms DeepThought into a full-stack application called **Operate+
 - [X] If present, set `db_item = {"val1": input_params["val1"], "val2": input_params["val2"]}` and skip the QUERY_DATABASE step
 - [X] This is backward compatible — the old `/calculate` endpoint still passes pk/sk
 
-**Key change in `src/deepthought/agents/state.py`:**
-- Add `node_timings: dict[str, float]` to AgentState for per-node timing (deferred — using total_duration_ms for now)
+### 4.4.1 Per-node timing instrumentation
 
-**Timing instrumentation in each node:**
-- Record `time.perf_counter()` at node start/end (deferred — per-node timing is a future enhancement)
-- Return `node_timings` with the node's duration in the state update
+- [X] Add `node_timings: dict[str, float]` to `AgentState` in `agents/state.py`
+- [X] Wrap each node (orchestrator, execution, verification, response) with `time.perf_counter()` start/end
+- [X] Each node returns `node_timings: {"<node_name>": duration_ms}` in its state update
+- [X] Operate endpoint reads `node_timings` from `final_state` to populate `duration_ms` on each `AgentStepOutput`
+- [X] Add `node_timings: {}` to initial state in both `/operate` and `/calculate` endpoints
 
 ### 4.5 Telemetry capture in `/operate` endpoint
 The `final_state` from `graph.ainvoke()` already contains:
@@ -220,7 +221,7 @@ The `final_state` from `graph.ainvoke()` already contains:
 - [X] `final_state["execution_result"]` → ExecutionResult model
 - [X] `final_state["verification_result"]` → VerificationResult model
 - [X] `final_state["formatted_response"]` → FormattedResponse model
-- `final_state["node_timings"]` → per-node durations (deferred — total_duration_ms captured instead)
+- [X] `final_state["node_timings"]` → per-node durations
 
 [X] Build `agent_steps` list from these, store in logs table.
 

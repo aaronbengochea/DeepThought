@@ -35,6 +35,9 @@ class AgentState(TypedDict):
     # Message history for agent reasoning
     messages: Annotated[list[BaseMessage], add_messages]
 
+    # Per-node timing (populated as each node completes)
+    node_timings: dict[str, float]
+
     # Control flow
     current_step: str
     error: str | None

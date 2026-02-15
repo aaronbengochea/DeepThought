@@ -1,6 +1,7 @@
 """Response agent node - formats verified results into structured JSON."""
 
 import logging
+import time
 from typing import Any
 
 from langchain_core.messages import AIMessage
@@ -28,6 +29,8 @@ async def response_node(state: AgentState) -> dict[str, Any]:
     Returns:
         Updated state with formatted response.
     """
+    node_start_time = time.perf_counter()
+
     execution_result = state.get("execution_result")
     verification_result = state.get("verification_result")
     plan = state.get("plan")
@@ -41,9 +44,11 @@ async def response_node(state: AgentState) -> dict[str, Any]:
             metadata={"request_id": state["request_id"]},
             message=f"Error: {error}",
         )
+        duration_ms = (time.perf_counter() - node_start_time) * 1000
         return {
             "formatted_response": formatted,
             "current_step": "complete",
+            "node_timings": {"response": duration_ms},
             "messages": [AIMessage(content="Response formatted with error")],
         }
 
@@ -55,9 +60,11 @@ async def response_node(state: AgentState) -> dict[str, Any]:
             metadata={"request_id": state["request_id"]},
             message="Incomplete execution - missing required data",
         )
+        duration_ms = (time.perf_counter() - node_start_time) * 1000
         return {
             "formatted_response": formatted,
             "current_step": "complete",
+            "node_timings": {"response": duration_ms},
             "messages": [AIMessage(content="Response formatted with missing data error")],
         }
 
@@ -150,8 +157,10 @@ async def response_node(state: AgentState) -> dict[str, Any]:
         message=f"{operation.capitalize()} completed successfully" if is_success else f"{operation.capitalize()} completed with verification failures",
     )
 
+    duration_ms = (time.perf_counter() - node_start_time) * 1000
     return {
         "formatted_response": formatted,
         "current_step": "complete",
+        "node_timings": {"response": duration_ms},
         "messages": [AIMessage(content=f"Response formatted for {operation}")],
     }
