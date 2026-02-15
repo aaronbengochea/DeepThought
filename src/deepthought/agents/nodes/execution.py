@@ -65,8 +65,19 @@ async def execution_node(state: AgentState) -> dict[str, Any]:
     final_value: int | float | None = None
     operation: str = "add"
 
+    # If input_params contains val1 and val2 directly, skip the DB query step.
+    # This supports the /operate endpoint which passes values from the pairs table.
+    input_params = state.get("input_params", {})
+    if "val1" in input_params and "val2" in input_params:
+        db_item = {"val1": input_params["val1"], "val2": input_params["val2"]}
+
     for step in plan.steps:
         if step.step_type == PlanStepType.QUERY_DATABASE:
+            # Skip DB query if values were passed directly via input_params
+            if db_item is not None:
+                executed_steps.append(step.step_number)
+                continue
+
             executed_steps.append(step.step_number)
             # Execute DynamoDB query
             start_time = time.perf_counter()
