@@ -340,24 +340,25 @@ frontend/
 **Verify:** Can create pairs, see them listed with date/time, navigate to operations view.
 
 ### 6.1 Dashboard page (`app/dashboard/page.tsx`)
-- **Create Pair** section: form with two number inputs + "Create Pair" button
-- **Your Pairs** section: grid of pair cards, sorted by newest first
-- Dashboard layout: navbar with "Operate+" logo, user name, theme toggle, logout
+- [X] **Create Pair** section: form with two number inputs + "Create Pair" button
+- [X] **Your Pairs** section: responsive grid of pair cards, sorted by newest first
+- [X] Loading skeleton shimmer, error state, and empty state with icon
+- [X] Dashboard layout: navbar with "Operate+" logo, user name, theme toggle, logout (from Phase 5)
 
 ### 6.2 React Query hooks (`hooks/use-pairs.ts`)
-- `usePairs()` — `GET /pairs`, returns `Pair[]`
-- `useCreatePair()` — `POST /pairs`, invalidates pairs query on success
+- [X] `usePairs()` — `GET /pairs`, returns `Pair[]`
+- [X] `useCreatePair()` — `POST /pairs`, invalidates pairs query on success
 
 ### 6.3 Pair card component (`components/pairs/pair-card.tsx`)
-- Displays val1 and val2 prominently (large numbers)
-- Created date/time in human-readable format (e.g., "Feb 10, 2026 at 3:45 PM")
-- Rounded-xl card with gradient border, hover scale effect
-- Clickable — navigates to `/pairs/[pairId]`
+- [X] Displays val1 and val2 prominently with display font and "&" connector
+- [X] Created date/time in human-readable format (e.g., "Feb 10, 2026 at 3:45 PM")
+- [X] Gradient border card with hover scale effect and accent shadow
+- [X] Clickable — navigates to `/pairs/[pairId]`
 
 ### 6.4 Pair form component (`components/pairs/pair-form.tsx`)
-- Two number inputs with labels
-- Submit button with loading spinner
-- Success toast/animation on creation
+- [X] Two number inputs in a grid layout with labels
+- [X] Submit button with Plus icon and loading spinner
+- [X] Success message with fade-in animation on creation
 
 ---
 
