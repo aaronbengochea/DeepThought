@@ -11,7 +11,7 @@ COMPOSE = docker compose --env-file ./backend/.env --env-file ./frontend/.env
 # ---------------------------------------------------------------------------
 
 build:
-	$(COMPOSE) build
+	$(COMPOSE) build --no-cache
 
 up: build
 	$(COMPOSE) up -d
