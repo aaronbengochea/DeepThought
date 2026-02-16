@@ -256,58 +256,80 @@ The `final_state` from `graph.ainvoke()` already contains:
 **Verify:** `cd frontend && npm run dev` — auth page renders, can toggle dark/light mode.
 
 ### 5.1 Initialize Next.js
-```bash
-npx create-next-app@latest frontend --typescript --tailwind --app --src-dir --import-alias "@/*"
-```
+- [X] Next.js 16 with TypeScript, Tailwind CSS 4, App Router, src directory, ESLint
+- [X] React Compiler enabled via `babel-plugin-react-compiler` + `reactCompiler: true`
+- [X] Standalone output configured for Docker deployment
 
 ### 5.2 Install dependencies
-```bash
-npm install @tanstack/react-query axios lucide-react next-themes
-```
+- [X] `@tanstack/react-query`, `axios`, `lucide-react`, `next-themes`
 
 ### 5.3 Project structure
 ```
-frontend/src/
-  app/
-    layout.tsx          — root layout with AuthProvider, QueryClientProvider, ThemeProvider
-    page.tsx            — redirect to /auth or /dashboard based on auth state
-    globals.css         — Tailwind config + custom gradient/dark-mode styles
-    auth/page.tsx       — sign in / sign up view
-    dashboard/
-      page.tsx          — pair input + pair list
-      layout.tsx        — dashboard shell with navbar
-    pairs/[pairId]/
-      page.tsx          — operations view with telemetry timeline
-  components/
-    ui/                 — button, input, card, toggle (reusable primitives)
-    auth/               — sign-in-form, sign-up-form
-    pairs/              — pair-card, pair-form, operation-button
-    telemetry/          — agent-timeline, step-detail
-    layout/             — navbar, theme-toggle
-  contexts/
-    auth-context.tsx    — React Context: user, token, login, signup, logout
-  lib/
-    api.ts              — Axios instance with JWT interceptor, baseURL from env
-    types.ts            — TypeScript interfaces matching backend models
-  hooks/
-    use-auth.ts         — hook wrapping auth context
-    use-pairs.ts        — React Query hooks for pairs CRUD
-    use-operations.ts   — React Query hooks for operate + logs
+frontend/
+  .env                  — environment variables (gitignored)
+  .env.example          — environment template (committed)
+  .gitignore            — frontend-specific ignores
+  Dockerfile            — multi-stage build for production
+  eslint.config.mjs     — ESLint with Next.js + TypeScript rules
+  next.config.ts        — React Compiler + standalone output
+  package.json          — dependencies and scripts
+  postcss.config.mjs    — Tailwind CSS PostCSS plugin
+  tsconfig.json         — TypeScript configuration
+  src/
+    app/
+      layout.tsx        — root layout with Syne/DM Sans/JetBrains Mono fonts + Providers
+      page.tsx          — auth-aware redirect to /auth or /dashboard
+      providers.tsx     — ThemeProvider, QueryClientProvider, AuthProvider
+      globals.css       — dark cosmic/aurora theme, gradient utilities, noise texture
+      favicon.ico       — app icon
+      auth/
+        page.tsx        — sign in / sign up with aurora background
+      dashboard/
+        layout.tsx      — auth-guarded shell with navbar
+        page.tsx        — placeholder (Phase 6)
+      pairs/[pairId]/
+        page.tsx        — operations view with telemetry timeline (Phase 7)
+    components/
+      ui/
+        button.tsx      — 3 variants (primary/secondary/ghost), 3 sizes, loading state
+        input.tsx       — labeled input with error display
+        card.tsx        — with optional gradient border effect
+      auth/
+        sign-in-form.tsx  — email + password, error handling, redirect on success
+        sign-up-form.tsx  — name + email + password, validation, redirect on success
+      pairs/              — pair-card, pair-form, operation-button (Phase 6)
+      telemetry/          — agent-timeline, step-detail (Phase 7)
+      layout/
+        navbar.tsx      — Operate+ logo, user name, theme toggle, sign out
+        theme-toggle.tsx — sun/moon icon toggle via next-themes
+    contexts/
+      auth-context.tsx  — React Context: user, token, signUp, signIn, signOut, isLoading
+    lib/
+      api.ts            — Axios instance with JWT interceptor, baseURL from NEXT_PUBLIC_API_URL
+      types.ts          — TypeScript interfaces matching backend models
+    hooks/
+      use-auth.ts       — hook wrapping auth context
+      use-pairs.ts      — React Query hooks for pairs CRUD (Phase 6)
+      use-operations.ts — React Query hooks for operate + logs (Phase 7)
 ```
 
 ### 5.4 Auth page design ("Operate+" branding)
-- Centered card with logo/title "Operate+"
-- Toggle between Sign In and Sign Up forms
-- Sign In: email + password inputs, submit button
-- Sign Up: email + name + password inputs, submit button
-- On success: store JWT in localStorage, redirect to `/dashboard`
-- Theme toggle in top-right corner
-- Design: rounded-2xl cards, gradient accent borders, backdrop blur, dark bg (`slate-900`) / light bg (`slate-50`)
+- [X] Centered glass-morphic card with gradient border and backdrop blur
+- [X] "Operate+" logo with gradient text and accent "+"
+- [X] Tab toggle between Sign In and Sign Up forms
+- [X] Sign In: email + password inputs, submit button, error handling
+- [X] Sign Up: name + email + password inputs, min 8 char validation, error handling
+- [X] On success: store JWT in localStorage, redirect to `/dashboard`
+- [X] Theme toggle in top-right corner
+- [X] Aurora background with animated gradient blobs, grid overlay, noise texture
 
 ### 5.5 Theme configuration
-- `next-themes` with `darkMode: 'class'` in Tailwind config
-- Theme toggle component with sun/moon icons from lucide-react
-- CSS custom properties for gradient accents (purple-blue in dark, blue-teal in light)
+- [X] `next-themes` with `attribute="class"`, `defaultTheme="dark"`
+- [X] ThemeToggle component with Sun/Moon icons from lucide-react
+- [X] Dark cosmic theme: deep navy (#06080f), cyan/violet/fuchsia aurora accents
+- [X] Light theme: warm neutrals (#fafbfc), blue/violet/pink accents
+- [X] CSS custom properties for surfaces, text, borders, accents, gradients
+- [X] Utility classes: gradient-text, gradient-border, glow-surface, noise, shimmer, aurora-blob
 
 ---
 
@@ -387,59 +409,28 @@ frontend/src/
 
 **Goal:** Containerize backend and frontend, unified docker-compose with shared network.
 
-**Verify:** `docker compose up` — all 3 services start, frontend at :3000, backend at :8080, DynamoDB at :8000.
+**Verify:** `docker compose up` — all services start, frontend at :3000, backend at :8080, DynamoDB at :8000, DynamoDB Admin at :8001.
 
-### 8.1 New file: `Dockerfile` (backend)
-```dockerfile
-FROM python:3.11-slim
-WORKDIR /app
-COPY pyproject.toml .
-RUN pip install --no-cache-dir -e "."
-COPY src/ src/
-COPY scripts/ scripts/
-EXPOSE 8080
-CMD ["uvicorn", "src.deepthought.api.app:create_app", "--factory", "--host", "0.0.0.0", "--port", "8080"]
-```
+### 8.1 `backend/Dockerfile`
+- [X] Python 3.11-slim, pip install from pyproject.toml, copy src/ and scripts/, uvicorn CMD
 
-### 8.2 New file: `frontend/Dockerfile`
-Multi-stage build:
-- Stage 1 (builder): `node:20-alpine`, `npm ci`, `npm run build` (with `NEXT_PUBLIC_API_URL` build arg)
-- Stage 2 (runner): `node:20-alpine`, copy standalone output, `EXPOSE 3000`, `CMD ["node", "server.js"]`
-- Requires `output: 'standalone'` in `next.config.ts`
+### 8.2 `frontend/Dockerfile`
+- [X] Multi-stage build: node:20-alpine builder (npm ci + build with NEXT_PUBLIC_API_URL arg) → runner (standalone output)
+- [X] `output: 'standalone'` configured in `next.config.ts`
 
-### 8.3 `docker-compose.yml` — full rewrite
-```yaml
-services:
-  dynamodb-local:
-    image: amazon/dynamodb-local:latest
-    ports: ["8000:8000"]
-    healthcheck: ...
-    networks: [deepthought-network]
+### 8.3 `docker-compose.yml`
+- [X] `dynamodb-local` — DynamoDB Local on :8000 with healthcheck
+- [X] `dynamodb-admin` — DynamoDB Admin GUI on :8001 with AWS creds from backend/.env
+- [X] `seed` — runs seed_data.py after DynamoDB is healthy
+- [X] `backend` — FastAPI on :8080, depends on seed completion
+- [X] `frontend` — Next.js on :3000, NEXT_PUBLIC_API_URL from frontend/.env
+- [X] All services on `deepthought` bridge network
+- [X] All env vars sourced from backend/.env and frontend/.env (no hardcoded values)
 
-  backend:
-    build: { context: ., dockerfile: Dockerfile }
-    ports: ["8080:8080"]
-    env_file: [.env]
-    environment:
-      DYNAMODB_ENDPOINT_URL: http://dynamodb-local:8000
-    depends_on:
-      dynamodb-local: { condition: service_healthy }
-    networks: [deepthought-network]
-
-  frontend:
-    build:
-      context: ./frontend
-      args: { NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1 }
-    ports: ["3000:3000"]
-    depends_on: [backend]
-    networks: [deepthought-network]
-
-networks:
-  deepthought-network:
-    driver: bridge
-```
-
-### 8.4 New files: `.dockerignore` and `frontend/.dockerignore`
+### 8.4 Monorepo restructuring
+- [X] Backend moved into `backend/` directory (src/, tests/, scripts/, pyproject.toml, .env)
+- [X] Per-directory `.gitignore` files for independent deployability
+- [X] `backend/documentation/` directory for design docs
 
 ---
 
@@ -448,14 +439,16 @@ networks:
 **Goal:** New commands for full-stack build/run/dev workflow.
 
 ### 9.1 `Makefile`
-- `make build` — `docker compose build`
-- `make up` — `docker compose up -d` + sleep + `make seed` + print service URLs
-- `make down` — `docker compose down`
-- `make dev` — start DynamoDB + seed + backend (uvicorn --reload) + frontend (npm run dev)
-- `make frontend-dev` — `cd frontend && npm run dev`
-- `make lint` — `ruff check src/ && ruff format --check src/ && mypy src/`
-- `make test` — `pytest tests/`
-- Keep existing `allLocal`, `database`, `seed`, `downAllLocal` commands working
+- [X] `COMPOSE` variable with `--env-file ./backend/.env --env-file ./frontend/.env`
+- [X] `make build` — `docker compose build`
+- [X] `make up` — build + up -d + print service URLs (frontend, backend, API docs, DynamoDB, DynamoDB GUI)
+- [X] `make down` — `docker compose down`
+- [X] `make database` — DynamoDB Local only
+- [X] `make seed` — database + seed via Docker
+- [X] `make dev` — DynamoDB + seed + backend (uvicorn --reload) + frontend (npm run dev)
+- [X] `make frontend-dev` — `cd frontend && npm run dev`
+- [X] `make test` — `cd backend && pytest`
+- [X] `make lint` — `cd backend && ruff check + format --check + mypy`
 
 ---
 
@@ -463,19 +456,22 @@ networks:
 
 **Goal:** End-to-end tests, documentation, edge case handling.
 
-### 10.1 New file: `tests/integration/test_api_flow.py`
+### 10.1 New file: `backend/tests/integration/test_api_flow.py`
 - Full flow: signup → signin → create pair → operate (all 4 ops) → get logs
 - Auth edge cases: duplicate signup (409), wrong password (401), expired JWT
 - Ownership: user A cannot access user B's pairs
 
 ### 10.2 Update `CLAUDE.md` and `README.md`
-- New architecture diagram, API endpoints, frontend info, Docker deployment, Google-only LLM
+- [X] CLAUDE.md updated with monorepo structure, new paths, Docker services
+- New architecture diagram, API endpoints, frontend info
 
 ### 10.3 Update `.env.example`
-- Add new table names, JWT settings
+- [X] Backend `.env.example` has all table names, JWT settings
+- [X] Frontend `.env.example` has NEXT_PUBLIC_API_URL
 
 ### 10.4 Update `.gitignore`
-- Add `frontend/node_modules/`, `frontend/.next/`
+- [X] Per-directory .gitignore files for backend/ and frontend/
+- [X] Root .gitignore covers only IDE and OS files
 
 ---
 
@@ -501,25 +497,31 @@ Phase 5 (Frontend Scaffold) ──→ Phase 6 (Pairs UI) ──→ Phase 7 (Ops 
 
 ## Files Summary
 
-**New files (~20+ backend, ~30+ frontend):**
-- `src/deepthought/models/users.py`, `pairs.py`, `logs.py`
-- `src/deepthought/api/auth.py`
-- `src/deepthought/api/routes/auth.py`, `pairs.py`
-- `tests/unit/test_auth.py`, `test_pairs.py`
-- `tests/integration/test_api_flow.py`
-- `Dockerfile`, `.dockerignore`
-- `frontend/` (entire Next.js app)
-- `frontend/Dockerfile`, `frontend/.dockerignore`
+**Monorepo structure:**
+```
+DeepThought/
+  .gitignore              — IDE + OS ignores only
+  CLAUDE.md               — project instructions
+  Makefile                — full-stack build/run/dev commands
+  docker-compose.yml      — all services orchestration
+  plan.md                 — this file
+  README.md
+  backend/
+    .gitignore            — Python-specific ignores
+    .env / .env.example   — backend environment config
+    Dockerfile            — backend container
+    pyproject.toml        — Python deps + tool config
+    documentation/        — design docs
+    scripts/              — seed_data.py
+    src/deepthought/      — FastAPI + LangGraph source
+    tests/                — pytest unit + integration tests
+  frontend/
+    .gitignore            — Node/Next.js-specific ignores
+    .env / .env.example   — frontend environment config
+    Dockerfile            — frontend container (multi-stage)
+    package.json          — Node deps + scripts
+    next.config.ts        — React Compiler + standalone output
+    src/                  — Next.js App Router source
+```
 
-**Modified files (~20):**
-- `src/deepthought/tools/math_ops.py`, `verification.py`, `__init__.py`, `formatting.py`
-- `src/deepthought/agents/nodes/orchestrator.py`, `execution.py`, `verification.py`, `response.py`
-- `src/deepthought/agents/prompts/orchestrator.py`, `execution.py`, `verification.py`, `response.py`
-- `src/deepthought/agents/state.py`
-- `src/deepthought/llm/provider.py`, `__init__.py`
-- `src/deepthought/config/settings.py`
-- `src/deepthought/api/app.py`, `dependencies.py`
-- `src/deepthought/core/exceptions.py`
-- `pyproject.toml`, `docker-compose.yml`, `Makefile`, `.env.example`, `scripts/seed_data.py`
-
-**Deleted files:** `scripts/setup_ollama.py`
+**Deleted files:** `scripts/setup_ollama.py`, old root-level config files (moved to backend/)
