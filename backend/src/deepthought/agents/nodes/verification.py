@@ -86,6 +86,13 @@ async def verification_node(state: AgentState) -> dict[str, Any]:
             elif tr.tool_name == "divide_values":
                 operation = "divide"
 
+    # Fall back to input_params for val1/val2 when DB query was skipped
+    # (the /operate endpoint passes values directly from the pairs table)
+    if db_result is None:
+        input_params = state.get("input_params", {})
+        if "val1" in input_params and "val2" in input_params:
+            db_result = {"val1": input_params["val1"], "val2": input_params["val2"]}
+
     # Also check plan for operation if not found in tool results
     for step in plan.steps:
         if step.parameters.get("operation"):
