@@ -438,11 +438,12 @@ frontend/
 - [X] `make build` — `docker compose build`
 - [X] `make up` — build + up -d + print service URLs (frontend, backend, API docs, DynamoDB, DynamoDB GUI)
 - [X] `make down` — `docker compose down`
-- [X] `make database` — DynamoDB Local only
+- [X] `make database` — DynamoDB Local + DynamoDB Admin GUI
 - [X] `make seed` — database + seed via Docker
 - [X] `make dev` — DynamoDB + seed + backend (uvicorn --reload) + frontend (npm run dev)
-- [X] `make frontend-dev` — `cd frontend && npm run dev`
-- [X] `make test` — `cd backend && pytest`
+- [X] `make dev-backend` / `make dev-frontend` — individual dev servers
+- [X] `make install` / `make install-backend` / `make install-frontend` — dependency installation
+- [X] `make test` / `make test-backend` / `make test-frontend` — test execution
 - [X] `make lint` — `cd backend && ruff check + format --check + mypy`
 
 ---
@@ -452,13 +453,13 @@ frontend/
 **Goal:** End-to-end tests, documentation, edge case handling.
 
 ### 10.1 New file: `backend/tests/integration/test_api_flow.py`
-- Full flow: signup → signin → create pair → operate (all 4 ops) → get logs
-- Auth edge cases: duplicate signup (409), wrong password (401), expired JWT
-- Ownership: user A cannot access user B's pairs
+- [X] Full flow: signup → signin → create pair → operate (all 4 ops) → get logs
+- [X] Auth edge cases: duplicate signup (409), wrong password (401), expired JWT
+- [X] Ownership: user A cannot access user B's pairs
 
 ### 10.2 Update `CLAUDE.md` and `README.md`
 - [X] CLAUDE.md updated with monorepo structure, new paths, Docker services
-- New architecture diagram, API endpoints, frontend info
+- [X] README with architecture diagram, Makefile commands, service endpoints, env var reference
 
 ### 10.3 Update `.env.example`
 - [X] Backend `.env.example` has all table names, JWT settings
