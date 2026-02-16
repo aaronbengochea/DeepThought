@@ -4,36 +4,47 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-DeepThought is an AI-powered multi-agent calculation service built with FastAPI and LangGraph. LLM-powered agents collaborate through a LangGraph StateGraph to execute calculations fetched from DynamoDB: orchestrator plans, execution runs tools, verification validates, response formats output.
+DeepThought (Operate+) is an AI-powered multi-agent calculation service with a Next.js frontend and FastAPI + LangGraph backend. LLM-powered agents collaborate through a LangGraph StateGraph to execute calculations: orchestrator plans, execution runs tools, verification validates, response formats output.
+
+## Project Structure
+
+```
+DeepThought/
+  backend/          — Python FastAPI + LangGraph backend
+  frontend/         — Next.js TypeScript frontend
+  docker-compose.yml
+  Makefile
+```
 
 ## Build & Run Commands
 
 ```bash
-# Install dependencies
-pip install -e ".[dev]"
-
-# Start everything locally (DynamoDB + seed + server on :8080)
-make allLocal
+# Full stack (Docker)
+make build                # Build all containers
+make up                   # Start everything (DynamoDB + seed + backend + frontend)
+make down                 # Stop all services
 
 # Individual services
-make database              # DynamoDB Local only (Docker, port 8000)
-make seed                  # Seed test data
-make downAllLocal          # Stop all services
+make database             # DynamoDB Local only (Docker, port 8000)
+make seed                 # Seed test data via Docker
 
-# Run server manually
+# Local development (backend + frontend outside Docker)
+make dev                  # DynamoDB (Docker) + seed + backend :8080 + frontend :3000
+make frontend-dev         # Frontend dev server only
+
+# Backend commands (run from backend/)
+cd backend
+pip install -e ".[dev]"
 uvicorn src.deepthought.api.app:create_app --factory --reload --port 8080
+pytest                    # All tests
+pytest tests/unit/        # Unit tests only
+mypy src/                 # Type checking
+ruff check src/           # Lint
+ruff format src/          # Format
 
-# Tests
-pytest                                    # All tests
-pytest tests/unit/                        # Unit tests only
-pytest tests/unit/test_nodes.py           # Single test file
-pytest tests/unit/test_nodes.py::test_orchestrator_node  # Single test
-pytest --cov=src/deepthought             # With coverage
-
-# Type checking & linting
-mypy src/                  # Strict mode with pydantic plugin
-ruff check src/            # Lint
-ruff format src/           # Format
+# Quality (from repo root)
+make test                 # Run backend tests
+make lint                 # Ruff + mypy
 ```
 
 ## Architecture
@@ -44,9 +55,9 @@ ruff format src/           # Format
 START → orchestrator → execution → verification → response → END
 ```
 
-Each node is an async function in `src/deepthought/agents/nodes/` that receives `AgentState` (TypedDict) and returns partial state updates. Conditional routing in `agents/edges/routing.py` handles retries (max 3 execution, max 2 verification) and error paths that skip to the response node.
+Each node is an async function in `backend/src/deepthought/agents/nodes/` that receives `AgentState` (TypedDict) and returns partial state updates. Conditional routing in `agents/edges/routing.py` handles retries (max 3 execution, max 2 verification) and error paths that skip to the response node.
 
-### Key Modules
+### Key Modules (under `backend/src/deepthought/`)
 
 - **`api/`** — FastAPI app factory (`create_app()`), routes, dependency injection via `Depends()`
 - **`agents/`** — LangGraph graph definition, node implementations, routing edges, system prompts per agent
@@ -71,7 +82,7 @@ Three tables with composite keys (`pk` + `sk`):
 - **Users** (`deepthought-users`): `pk` = email (no sort key)
 - **Pairs** (`deepthought-pairs`): `pk` = user_email, `sk` = pair_id (UUID)
 - **Logs** (`deepthought-logs`): `pk` = pair_id, `sk` = `OP#{timestamp}#{log_id}`
-- Local DynamoDB via Docker on port 8000; seed with `scripts/seed_data.py`
+- Local DynamoDB via Docker on port 8000; seed with `backend/scripts/seed_data.py`
 
 ## Code Conventions
 
@@ -86,17 +97,20 @@ Three tables with composite keys (`pk` + `sk`):
 
 ## Environment Configuration
 
-Copy `.env.example` to `.env`. All variables are required (no hardcoded defaults):
+Backend: copy `backend/.env.example` to `backend/.env`. All variables are required (no hardcoded defaults):
 
 - `LLM_MODEL`: Google Gemini model name (e.g., `gemini-2.0-flash`)
 - `GOOGLE_API_KEY`: Google API key
 - `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`: AWS credentials
 - `DYNAMODB_ENDPOINT_URL`: DynamoDB endpoint (e.g., `http://localhost:8000`)
-- `DC_DYNAMODB_ENDPOINT`: Docker-internal DynamoDB endpoint (e.g., `http://deepthought-dynamodb:8000`)
 - `DYNAMODB_USERS_TABLE`, `DYNAMODB_PAIRS_TABLE`, `DYNAMODB_LOGS_TABLE`: DynamoDB table names
 - `JWT_SECRET_KEY`: Secret key for JWT token signing
 - `CORS_ORIGINS`: Allowed CORS origins
 
+Frontend: copy `frontend/.env.example` to `frontend/.env`:
+
+- `NEXT_PUBLIC_API_URL`: Backend API URL (e.g., `http://localhost:8080/api/v1`)
+
 ## Docker Services
 
-`docker-compose.yml` provides DynamoDB Local (port 8000) and DynamoDB Admin GUI (port 8001) on the `sn-deepthought` bridge network.
+`docker-compose.yml` orchestrates: DynamoDB Local (:8000), seed runner, backend (:8080), frontend (:3000) on the `deepthought` bridge network.

@@ -1,35 +1,8 @@
-# Python
-__pycache__/
-*.py[cod]
-*.egg-info/
-dist/
-build/
-
-# Virtual environments
-.env
-.venv
-
 # IDE
 .idea/
 .vscode/
 *.swp
 
-# Testing
-.coverage
-.coverage.*
-htmlcov/
-.pytest_cache/
-.mypy_cache/
-
-# Local DynamoDB
-.dynamodb/
-
-# Frontend
-frontend/node_modules/
-frontend/.next/
-frontend/.env
-
 # OS
 .DS_Store
-data/
 .claude/

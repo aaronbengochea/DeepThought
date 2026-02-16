@@ -1,23 +1,48 @@
-.PHONY: allLocal database seed downAllLocal
+.PHONY: up down build database seed dev frontend-dev test lint
 
+# Full stack
+build:
+	docker compose build
+
+up: build
+	docker compose up -d
+	@echo ""
+	@echo "Services running:"
+	@echo "  Frontend:  http://localhost:3000"
+	@echo "  Backend:   http://localhost:8080"
+	@echo "  API docs:  http://localhost:8080/docs"
+	@echo "  DynamoDB:  http://localhost:8000"
+
+down:
+	docker compose down
+
+# Individual services
 database:
 	docker compose up -d dynamodb-local
 
-seed:
-	python scripts/seed_data.py
-
-allLocal: database
+seed: database
 	@sleep 2
-	$(MAKE) seed
-	@echo "Starting server in background on port 8080..."
-	@uvicorn src.deepthought.api.app:create_app --factory --reload --port 8080 > /dev/null 2>&1 &
-	@echo "Server running at http://localhost:8080"
-	@echo "API docs at http://localhost:8080/docs"
-	@echo "Use 'make downAllLocal' to stop all services"
+	docker compose run --rm seed
 
-downAllLocal:
-	@echo "Stopping uvicorn server..."
-	@pkill -f "uvicorn.*8080" 2>/dev/null || true
-	@echo "Stopping Docker containers..."
-	docker compose down
-	@echo "All services stopped"
+# Local development (without Docker for backend/frontend)
+dev: database
+	@sleep 2
+	docker compose run --rm seed
+	@echo "Starting backend on port 8080..."
+	@cd backend && uvicorn src.deepthought.api.app:create_app --factory --reload --port 8080 &
+	@echo "Starting frontend on port 3000..."
+	@cd frontend && npm run dev &
+	@echo ""
+	@echo "Dev servers running:"
+	@echo "  Frontend:  http://localhost:3000"
+	@echo "  Backend:   http://localhost:8080"
+
+frontend-dev:
+	cd frontend && npm run dev
+
+# Quality
+test:
+	cd backend && pytest
+
+lint:
+	cd backend && ruff check src/ && ruff format --check src/ && mypy src/

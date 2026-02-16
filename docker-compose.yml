@@ -7,31 +7,62 @@ services:
     command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /data"
     user: root
     volumes:
-      - ./data/dynamodb:/data
+      - dynamodb-data:/data
     healthcheck:
       test: ["CMD-SHELL", "curl -s http://localhost:8000/shell/ || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
     networks:
-      - sn-deepthought
+      - deepthought
 
-  dynamodb-admin:
-    image: aaronshaf/dynamodb-admin
-    container_name: deepthought-dynamodb-admin
-    ports:
-      - "8001:8001"
+  seed:
+    build:
+      context: ./backend
+    container_name: deepthought-seed
+    command: ["python", "scripts/seed_data.py"]
+    env_file:
+      - ./backend/.env
     environment:
-      - DYNAMO_ENDPOINT=${DC_DYNAMODB_ENDPOINT}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_REGION=${AWS_REGION}
+      DYNAMODB_ENDPOINT_URL: http://dynamodb-local:8000
     depends_on:
       dynamodb-local:
         condition: service_healthy
     networks:
-      - sn-deepthought
+      - deepthought
+
+  backend:
+    build:
+      context: ./backend
+    container_name: deepthought-backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./backend/.env
+    environment:
+      DYNAMODB_ENDPOINT_URL: http://dynamodb-local:8000
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    networks:
+      - deepthought
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1
+    container_name: deepthought-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - deepthought
+
+volumes:
+  dynamodb-data:
 
 networks:
-  sn-deepthought:
+  deepthought:
     driver: bridge
