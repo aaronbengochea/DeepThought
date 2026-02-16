@@ -5,6 +5,7 @@ import os
 import uuid
 from datetime import datetime, timezone
 
+import bcrypt
 import boto3
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
@@ -53,11 +54,14 @@ def seed_users(dynamodb_resource: boto3.resource) -> None:
     """Seed a test user."""
     table = dynamodb_resource.Table(os.environ["DYNAMODB_USERS_TABLE"])
 
+    password = os.environ["TEST_USER_PASSWORD"]
+    password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
     user = {
         "pk": "test@example.com",
         "first_name": "Test",
         "last_name": "User",
-        "password_hash": os.environ["TEST_USER_PASSWORD_HASH"],
+        "password_hash": password_hash,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
