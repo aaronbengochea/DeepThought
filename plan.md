@@ -369,40 +369,34 @@ frontend/
 **Verify:** Click operation → loading → timeline appears showing all 4 agent steps with expandable details.
 
 ### 7.1 Operations page (`app/pairs/[pairId]/page.tsx`)
-- Back button to dashboard
-- Pair info header: val1, val2
-- **4 operation buttons** in a row: Add (+), Subtract (-), Multiply (x), Divide (/)
-  - Color-coded: blue/green/purple/orange
-  - Rounded-xl with gradient backgrounds
-  - Loading spinner when operation in progress
-- **Operation history** below: list of past operations for this pair
-  - Each entry: operation icon, result, timestamp, success badge
-  - Expandable to show full telemetry timeline
+- [X] Back button to dashboard
+- [X] Pair info header with pair ID
+- [X] **4 operation buttons** in responsive grid: Add (+), Subtract (-), Multiply (x), Divide (/)
+  - [X] Color-coded: blue/green/violet/amber gradient backgrounds
+  - [X] Loading spinner on active operation, all disabled while in progress
+- [X] **Operation history** below: sorted newest first
+  - [X] Each entry: operation symbol icon, capitalized name, result, timestamp, success/fail badge
+  - [X] Expandable to show full telemetry timeline
 
 ### 7.2 React Query hooks (`hooks/use-operations.ts`)
-- `useOperate(pairId)` — `POST /pairs/{pairId}/operate`, returns `OperationLog`
-- `useLogs(pairId)` — `GET /pairs/{pairId}/logs`, returns `OperationLog[]`
+- [X] `useOperate(pairId)` — `POST /pairs/{pairId}/operate`, returns `OperationLog`, invalidates logs
+- [X] `useLogs(pairId)` — `GET /pairs/{pairId}/logs`, returns `OperationLog[]`
 
 ### 7.3 Agent timeline component (`components/telemetry/agent-timeline.tsx`)
-- **Vertical timeline** with 4 nodes connected by a line:
-  1. **Orchestrator** — shows plan summary (operation, expected outcome)
-  2. **Execution** — shows tool calls, inputs, outputs, timing
-  3. **Verification** — shows checks, pass/fail status, confidence score
-  4. **Response** — shows final formatted result, expression
-- Each node: circle indicator (green=success, red=fail), agent name, duration badge
-- Click to expand/collapse detail panel
+- [X] **Vertical timeline** with nodes connected by gradient line (green=success, red=fail)
+  - [X] Orchestrator, Execution, Verification, Response — with descriptions
+- [X] Each node: colored circle indicator, agent name, duration badge (ms/s)
+- [X] Click to expand/collapse detail panel
 
 ### 7.4 Step detail component (`components/telemetry/step-detail.tsx`)
-- Expandable card under each timeline node
-- Shows full JSON output from the agent step
-- Formatted and syntax-highlighted
-- Copy-to-clipboard button
+- [X] Expandable card under each timeline node
+- [X] Full JSON output formatted with mono font
+- [X] Copy-to-clipboard button with check feedback
 
 ### 7.5 Operation button component (`components/pairs/operation-button.tsx`)
-- Icon + label (e.g., + Add)
-- Gradient background per operation
-- Disabled + spinner while any operation is in progress
-- Hover/active states
+- [X] Icon + label with gradient background per operation
+- [X] Disabled + spinner while any operation is in progress
+- [X] Hover, active scale, and shadow states
 
 ---
 
