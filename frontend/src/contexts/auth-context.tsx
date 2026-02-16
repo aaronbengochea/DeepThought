@@ -9,7 +9,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
-  signUp: (email: string, name: string, password: string) => Promise<void>;
+  signUp: (email: string, firstName: string, lastName: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => void;
 }
@@ -44,10 +44,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [fetchProfile]);
 
-  const signUp = async (email: string, name: string, password: string) => {
+  const signUp = async (email: string, firstName: string, lastName: string, password: string) => {
     const { data } = await api.post<AuthResponse>("/auth/signup", {
       email,
-      name,
+      first_name: firstName,
+      last_name: lastName,
       password,
     });
     localStorage.setItem("token", data.token);

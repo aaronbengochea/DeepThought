@@ -30,7 +30,7 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           {user && (
             <span className="hidden text-sm text-text-secondary sm:block">
-              {user.name}
+              {user.first_name}
             </span>
           )}
           <ThemeToggle />

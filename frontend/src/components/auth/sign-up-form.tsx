@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 export function SignUpForm() {
   const { signUp } = useAuth();
   const router = useRouter();
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -28,7 +29,7 @@ export function SignUpForm() {
     setIsLoading(true);
 
     try {
-      await signUp(email, name, password);
+      await signUp(email, firstName, lastName, password);
       router.push("/dashboard");
     } catch {
       setError("An account with this email already exists");
@@ -39,15 +40,26 @@ export function SignUpForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      <Input
-        label="Name"
-        type="text"
-        placeholder="Your name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        required
-        autoComplete="name"
-      />
+      <div className="grid grid-cols-2 gap-3">
+        <Input
+          label="First Name"
+          type="text"
+          placeholder="Jane"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          required
+          autoComplete="given-name"
+        />
+        <Input
+          label="Last Name"
+          type="text"
+          placeholder="Doe"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          required
+          autoComplete="family-name"
+        />
+      </div>
       <Input
         label="Email"
         type="email"
