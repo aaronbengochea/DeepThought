@@ -52,6 +52,8 @@ async def execution_node(state: AgentState) -> dict[str, Any]:
         Updated state with execution results.
     """
     node_start_time = time.perf_counter()
+    logger.info(f"Execution node entered. retry_count={state.get('retry_count', 0)}, "
+                f"current_step={state.get('current_step')}")
 
     plan = state.get("plan")
     if plan is None:
@@ -190,6 +192,11 @@ async def execution_node(state: AgentState) -> dict[str, Any]:
     }
 
     if not success:
-        result["retry_count"] = state.get("retry_count", 0) + 1
+        new_retry = state.get("retry_count", 0) + 1
+        result["retry_count"] = new_retry
+        logger.warning(f"Execution failed. retry_count incremented to {new_retry}. "
+                       f"tool_results={[(tr.tool_name, tr.success, tr.error_message) for tr in tool_results]}")
+    else:
+        logger.info(f"Execution succeeded. final_value={final_value}, operation={operation}")
 
     return result

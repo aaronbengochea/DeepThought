@@ -203,7 +203,9 @@ Please create an execution plan for this calculation task.
         logger.debug(f"Orchestrator LLM response: {response_text}")
 
         # Parse the LLM response into a Plan
+        logger.info(f"Orchestrator LLM raw response: {response_text[:500]}")
         plan = _parse_llm_plan(response_text, state)
+        logger.info(f"Parsed plan: {len(plan.steps)} steps, types={[s.step_type.value for s in plan.steps]}")
 
         duration_ms = (time.perf_counter() - start_time) * 1000
         return {

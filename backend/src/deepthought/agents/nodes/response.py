@@ -29,6 +29,7 @@ async def response_node(state: AgentState) -> dict[str, Any]:
     Returns:
         Updated state with formatted response.
     """
+    logger.info(f"Response node entered. current_step={state.get('current_step')}, error={state.get('error')}")
     node_start_time = time.perf_counter()
 
     execution_result = state.get("execution_result")

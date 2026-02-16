@@ -1,12 +1,16 @@
 """Pair management and operation endpoints."""
 
+import logging
 import time
+import traceback
 import uuid
 from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from langgraph.graph.state import CompiledStateGraph
+
+logger = logging.getLogger(__name__)
 
 from deepthought.api.auth import get_current_user
 from deepthought.api.dependencies import get_agent_graph, get_logs_db_client, get_pairs_db_client
@@ -148,8 +152,12 @@ async def operate_on_pair(
     # Execute the agent graph and time each phase
     start_time = time.perf_counter()
     try:
+        logger.info(f"Invoking agent graph for pair {pair_id}, operation: {request.operation}")
         final_state = await graph.ainvoke(initial_state)
+        logger.info(f"Agent graph completed. current_step={final_state.get('current_step')}, "
+                     f"error={final_state.get('error')}, retry_count={final_state.get('retry_count')}")
     except Exception as e:
+        logger.error(f"Agent execution failed: {e}\n{traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Agent execution failed: {str(e)}",

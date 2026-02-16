@@ -50,6 +50,7 @@ async def verification_node(state: AgentState) -> dict[str, Any]:
         Updated state with verification results.
     """
     node_start_time = time.perf_counter()
+    logger.info(f"Verification node entered. retry_count={state.get('retry_count', 0)}")
 
     execution_result = state.get("execution_result")
     plan = state.get("plan")
