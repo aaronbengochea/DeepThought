@@ -48,6 +48,11 @@ htmlcov/
 # Local DynamoDB
 .dynamodb/
 
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
 # OS
 .DS_Store
 Thumbs.db
