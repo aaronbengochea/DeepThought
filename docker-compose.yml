@@ -16,6 +16,24 @@ services:
     networks:
       - deepthought
 
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin
+    container_name: deepthought-dynamodb-admin
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./backend/.env
+    environment:
+      DYNAMO_ENDPOINT: ${DC_DYNAMODB_ENDPOINT}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+    depends_on:
+      dynamodb-local:
+        condition: service_healthy
+    networks:
+      - deepthought
+
   seed:
     build:
       context: ./backend
@@ -24,7 +42,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      DYNAMODB_ENDPOINT_URL: http://dynamodb-local:8000
+      DYNAMODB_ENDPOINT_URL: ${DC_DYNAMODB_ENDPOINT}
     depends_on:
       dynamodb-local:
         condition: service_healthy
@@ -40,7 +58,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      DYNAMODB_ENDPOINT_URL: http://dynamodb-local:8000
+      DYNAMODB_ENDPOINT_URL: ${DC_DYNAMODB_ENDPOINT}
     depends_on:
       seed:
         condition: service_completed_successfully
@@ -51,10 +69,12 @@ services:
     build:
       context: ./frontend
       args:
-        NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     container_name: deepthought-frontend
     ports:
       - "3000:3000"
+    env_file:
+      - ./frontend/.env
     depends_on:
       - backend
     networks:
