@@ -44,7 +44,7 @@ class Settings(BaseSettings):
     jwt_expiration_minutes: int = 1440
 
     # Test Seed Data
-    test_user_password_hash: str = ""
+    test_user_password: str = ""
 
     # CORS
     cors_origins: list[str]

@@ -171,18 +171,25 @@ async def execution_node(state: AgentState) -> dict[str, Any]:
                         )
                     )
 
+    success = all(tr.success for tr in tool_results) and len(tool_results) > 0
+
     execution_result = ExecutionResult(
         plan_id=plan.plan_id,
         executed_steps=executed_steps,
         tool_results=tool_results,
         final_value=final_value,
-        success=all(tr.success for tr in tool_results) and len(tool_results) > 0,
+        success=success,
     )
 
     duration_ms = (time.perf_counter() - node_start_time) * 1000
-    return {
+    result: dict[str, Any] = {
         "execution_result": execution_result,
         "current_step": "execution_complete",
         "node_timings": {"execution": duration_ms},
         "messages": [AIMessage(content=f"Executed {len(tool_results)} tools, operation: {operation}, result: {final_value}")],
     }
+
+    if not success:
+        result["retry_count"] = state.get("retry_count", 0) + 1
+
+    return result
