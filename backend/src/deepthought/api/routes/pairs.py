@@ -5,6 +5,7 @@ import time
 import traceback
 import uuid
 from datetime import datetime, timezone
+from decimal import Decimal
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -19,6 +20,17 @@ from deepthought.models.logs import AgentStepOutput, OperateRequest, OperationLo
 from deepthought.models.pairs import PairCreate, PairResponse
 
 router = APIRouter()
+
+
+def _floats_to_decimals(obj: Any) -> Any:
+    """Recursively convert float values to Decimal for DynamoDB compatibility."""
+    if isinstance(obj, float):
+        return Decimal(str(obj))
+    if isinstance(obj, dict):
+        return {k: _floats_to_decimals(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_floats_to_decimals(v) for v in obj]
+    return obj
 
 
 @router.post(
@@ -223,7 +235,7 @@ async def operate_on_pair(
         "total_duration_ms": total_duration_ms,
         "created_at": now.isoformat(),
     }
-    await logs_db.put_item(log_item)
+    await logs_db.put_item(_floats_to_decimals(log_item))
 
     return OperationLogResponse(
         log_id=log_id,
