@@ -2,6 +2,8 @@
 
 AI-powered multi-agent calculation service. A full-stack application where LLM agents collaborate through a LangGraph StateGraph to execute arithmetic operations on user-created number pairs, with real-time telemetry visualization.
 
+This project serves as a foundational framework designed to be extended with additional capabilities such as new agent types, hybrid RAG pipelines, expanded tooling, and richer UI features. The modular architecture — separable frontend/backend, pluggable LangGraph nodes, and per-directory deployment — makes it straightforward to layer on new functionality without reworking the core.
+
 ## Architecture
 
 ```
