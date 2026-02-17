@@ -20,6 +20,7 @@ Key architectural decisions:
 - **Separate landing page** at `/` linking to `/auth`
 - **Persisted chat conversations** in DynamoDB
 - **Per-feature gamification stats** (no central dashboard)
+- **User-first UI** — manual CRUD for calendar/todos before agent layer
 
 ---
 
@@ -202,13 +203,119 @@ app.include_router(stats.router, prefix="/api/v1/stats", tags=["stats"])
 
 ---
 
-## Phase 3: Chat Agent with Hybrid RAG
+## Phase 3: Frontend — Navigation, Landing Page & Calendar/Todo UIs
+
+**Objective**: Restructure frontend layout (sidebar + top bar), create landing page, build calendar and todo UI components, and wire them to Phase 2 backend APIs for user-initiated CRUD. Users can manually create events, manage todo lists, and complete items without any agent involvement.
+
+**Depends on**: Phase 2 (backend APIs)
+
+### 3.1: Route Restructure
+
+New route structure:
+```
+/                              → Landing page (unauthenticated)
+/auth                          → Sign in / Sign up (existing)
+/(authenticated)/pairs         → Pairs dashboard (moved from /dashboard)
+/(authenticated)/pairs/[pairId] → Pair detail
+/(authenticated)/calendar      → Calendar view
+/(authenticated)/todos         → Todo lists view
+/dashboard                     → Redirect to /pairs (backward compat)
+```
+
+Using a `(authenticated)` route group to share sidebar layout.
+
+### 3.2: Sidebar Component
+
+**Create** `frontend/src/components/layout/sidebar.tsx`
+- Fixed left sidebar, 60px wide (w-60)
+- Logo at top ("Operate+")
+- Nav items: Pairs (Layers icon), Calendar (Calendar icon), Todos (CheckSquare icon)
+- Active state: accent-muted background + accent text
+- Matches glassmorphism aesthetic (backdrop-blur, subtle border)
+
+### 3.3: Top Bar Update
+
+**Modify** `frontend/src/components/layout/navbar.tsx`
+- Remove logo (moved to sidebar)
+- Keep: user first name, "Chat with Plus+" button (right side), theme toggle, sign out
+- "Chat with Plus+" button is visible but disabled until Phase 5 (chat sidebar)
+
+### 3.4: Authenticated Layout
+
+**Create** `frontend/src/app/(authenticated)/layout.tsx`
+- Auth guard (redirect to /auth if unauthenticated)
+- Renders: `<Sidebar />` + content area offset by sidebar width
+- `<Navbar />` at top of content area
+
+### 3.5: Landing Page
+
+**Rewrite** `frontend/src/app/page.tsx`
+- Hero section: "Operate+" title, tagline, "Get Started" CTA → `/auth`
+- 3 feature cards: Pairs, Calendar, Todos (with icons and descriptions)
+- If authenticated, redirect to `/pairs`
+- Aurora aesthetic with grid overlay matching auth page style
+
+### 3.6: Move Existing Pages
+
+- Move `dashboard/page.tsx` content → `(authenticated)/pairs/page.tsx`
+- Move `pairs/[pairId]/page.tsx` → `(authenticated)/pairs/[pairId]/page.tsx`
+- Create `dashboard/page.tsx` as redirect stub → `/pairs`
+
+### 3.7: TypeScript Types & Hooks
+
+**Modify** `frontend/src/lib/types.ts` — add interfaces for CalendarEvent, TodoList, TodoItem, Stats, etc.
+
+**Create hooks:**
+- `frontend/src/hooks/use-calendar.ts` — `useCalendarEvents(start, end)`, `useCreateEvent()`, `useUpdateEvent()`, `useDeleteEvent()`
+- `frontend/src/hooks/use-todos.ts` — `useTodoLists()`, `useCreateTodoList()`, `useTodoItems(listId)`, `useCreateTodoItem()`, `useUpdateTodoItem()`, `useDeleteTodoItem()`
+- `frontend/src/hooks/use-stats.ts` — `usePairsStats()`, `useTodosStats()`
+
+Note: Chat-related types and hooks (`use-chat.ts`, Conversation, ChatMessage interfaces) are deferred to Phase 5 when the chat API exists.
+
+### 3.8: Calendar View
+
+**Calendar approach**: Build a custom calendar grid matching the aurora aesthetic. Use `date-fns` for date math. Custom is preferred over a library to maintain full design control.
+
+**Create** `frontend/src/components/calendar/` directory:
+- `calendar-header.tsx` — prev/next navigation, view mode toggle (day/week/month), current date display
+- `calendar-view.tsx` — main orchestrator component, renders appropriate grid based on view mode
+- `week-view.tsx` — 7-column time grid with hourly rows, events positioned by time
+- `day-view.tsx` — single-column time grid
+- `month-view.tsx` — traditional month grid with event dots/pills
+- `event-card.tsx` — individual event rendering in the grid (gradient accent styling)
+- `event-form-modal.tsx` — modal for creating/editing events with title, description, date/time pickers, recurrence picker
+- `recurrence-picker.tsx` — dropdown for common recurrence patterns (daily, weekly, monthly, custom)
+
+**Implement** `frontend/src/app/(authenticated)/calendar/page.tsx` — fully wired to Phase 2 calendar API via `use-calendar` hooks.
+
+### 3.9: Todo View
+
+**Create** `frontend/src/components/todos/` directory:
+- `todo-list-card.tsx` — clickable card showing list title + item count badge; expands on click
+- `todo-item-row.tsx` — checkbox + text; CSS transitions for check animation (slide to bottom, opacity → 0.4)
+- `create-list-form.tsx` — inline form for new list creation
+- `add-item-form.tsx` — inline form at bottom of expanded list
+
+**Implement** `frontend/src/app/(authenticated)/todos/page.tsx` — fully wired to Phase 2 todos API via `use-todos` hooks.
+
+Completed item animation:
+```css
+.todo-item-completed {
+  opacity: 0.4;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+```
+Sort completed items to end in render logic.
+
+---
+
+## Phase 4: Chat Agent with Hybrid RAG
 
 **Objective**: Conversational chat agent with domain-specific tools and hybrid RAG retrieval via Pinecone Inference (dense + sparse) with local FlashRank cross-encoder reranking.
 
-**Depends on**: Phase 2
+**Depends on**: Phase 2 (backend APIs for tools to call)
 
-### 3.1: RAG Infrastructure
+### 4.1: RAG Infrastructure
 
 **Create** `backend/src/deepthought/rag/` package:
 
@@ -260,7 +367,7 @@ Stage 3: Context injection into Gemini
          LLM generates response with tool access
 ```
 
-### 3.2: Chat Domain Tools
+### 4.2: Chat Domain Tools
 
 **Create** `backend/src/deepthought/tools/calendar_tools.py`:
 - `create_calendar_event(title, start_time, end_time, description, rrule)` — @tool
@@ -281,7 +388,7 @@ Stage 3: Context injection into Gemini
 **Create** `backend/src/deepthought/tools/chat_tool_factory.py`:
 - `get_tools_for_context(context_type, user_email, db_clients)` — returns domain-appropriate tools with DB clients bound via factory/partial pattern
 
-### 3.3: Chat Agent LangGraph
+### 4.3: Chat Agent LangGraph
 
 **Create** `backend/src/deepthought/agents/chat/` package:
 
@@ -310,7 +417,7 @@ START → retrieval → reasoning → END
 
 **`prompts.py`** — System prompts for the "Plus+" chat assistant, with context-specific tool instructions.
 
-### 3.4: Chat API Route
+### 4.4: Chat API Route
 
 **Create** `backend/src/deepthought/api/routes/chat.py`
 
@@ -333,7 +440,7 @@ Endpoints:
 app.include_router(chat.router, prefix="/api/v1/chat", tags=["chat"])
 ```
 
-### 3.5: Tests
+### 4.5: Tests
 
 - `backend/tests/unit/test_chat_graph.py` — retrieval + reasoning nodes with mocked LLM/Pinecone
 - `backend/tests/unit/test_chat_tools.py` — calendar, todo, pair tools with mocked DB
@@ -342,129 +449,20 @@ app.include_router(chat.router, prefix="/api/v1/chat", tags=["chat"])
 
 ---
 
-## Phase 4: Frontend Navigation Overhaul & Landing Page
+## Phase 5: Chat Sidebar & Gamification Stats
 
-**Objective**: Restructure layout to left sidebar + top bar. Create landing page. Set up route shells for new features.
+**Objective**: Sliding chat panel wired to Phase 4 chat API, and rolling bar charts for gamification stats. This is where the agent becomes accessible to the user — the "Chat with Plus+" button becomes functional.
 
-**Depends on**: None (can parallel with Phase 2/3 backend work)
+**Depends on**: Phase 3 (frontend pages), Phase 4 (chat API)
 
-### 4.1: Route Restructure
+### 5.1: Chat Types & Hooks
 
-New route structure:
-```
-/                              → Landing page (unauthenticated)
-/auth                          → Sign in / Sign up (existing)
-/(authenticated)/pairs         → Pairs dashboard (moved from /dashboard)
-/(authenticated)/pairs/[pairId] → Pair detail
-/(authenticated)/calendar      → Calendar view
-/(authenticated)/todos         → Todo lists view
-/dashboard                     → Redirect to /pairs (backward compat)
-```
-
-Using a `(authenticated)` route group to share sidebar layout.
-
-### 4.2: Sidebar Component
-
-**Create** `frontend/src/components/layout/sidebar.tsx`
-- Fixed left sidebar, 60px wide (w-60)
-- Logo at top ("Operate+")
-- Nav items: Pairs (Layers icon), Calendar (Calendar icon), Todos (CheckSquare icon)
-- Active state: accent-muted background + accent text
-- Matches glassmorphism aesthetic (backdrop-blur, subtle border)
-
-### 4.3: Top Bar Update
-
-**Modify** `frontend/src/components/layout/navbar.tsx`
-- Remove logo (moved to sidebar)
-- Keep: user first name, "Chat with Plus+" button (right side), theme toggle, sign out
-- "Chat with Plus+" button triggers chat panel open
-
-### 4.4: Authenticated Layout
-
-**Create** `frontend/src/app/(authenticated)/layout.tsx`
-- Auth guard (redirect to /auth if unauthenticated)
-- Renders: `<Sidebar />` + content area offset by sidebar width
-- `<Navbar />` at top of content area
-- `<ChatPanel />` (rendered but hidden by default)
-
-### 4.5: Landing Page
-
-**Rewrite** `frontend/src/app/page.tsx`
-- Hero section: "Operate+" title, tagline, "Get Started" CTA → `/auth`
-- 3 feature cards: Pairs, Calendar, Todos (with icons and descriptions)
-- If authenticated, redirect to `/pairs`
-- Aurora aesthetic with grid overlay matching auth page style
-
-### 4.6: Move Existing Pages
-
-- Move `dashboard/page.tsx` content → `(authenticated)/pairs/page.tsx`
-- Move `pairs/[pairId]/page.tsx` → `(authenticated)/pairs/[pairId]/page.tsx`
-- Create `dashboard/page.tsx` as redirect stub → `/pairs`
-- Create placeholder `(authenticated)/calendar/page.tsx`
-- Create placeholder `(authenticated)/todos/page.tsx`
-
----
-
-## Phase 5: Calendar & Todo Frontend UIs
-
-**Objective**: Build the calendar and todo list UI components.
-
-**Depends on**: Phase 2 (backend APIs), Phase 4 (navigation shell)
-
-### 5.1: TypeScript Types & Hooks
-
-**Modify** `frontend/src/lib/types.ts` — add interfaces for CalendarEvent, TodoList, TodoItem, Conversation, ChatMessage, Stats, etc.
+**Modify** `frontend/src/lib/types.ts` — add Conversation, ChatMessage interfaces.
 
 **Create hooks:**
-- `frontend/src/hooks/use-calendar.ts` — `useCalendarEvents(start, end)`, `useCreateEvent()`, `useUpdateEvent()`, `useDeleteEvent()`
-- `frontend/src/hooks/use-todos.ts` — `useTodoLists()`, `useCreateTodoList()`, `useTodoItems(listId)`, `useCreateTodoItem()`, `useUpdateTodoItem()`, `useDeleteTodoItem()`
 - `frontend/src/hooks/use-chat.ts` — `useConversations()`, `useChatMessages(convId)`, `useSendMessage()`
-- `frontend/src/hooks/use-stats.ts` — `usePairsStats()`, `useTodosStats()`
 
-### 5.2: Calendar View
-
-**Calendar approach**: Build a custom calendar grid matching the aurora aesthetic. Use `date-fns` for date math. Custom is preferred over a library to maintain full design control.
-
-**Create** `frontend/src/components/calendar/` directory:
-- `calendar-header.tsx` — prev/next navigation, view mode toggle (day/week/month), current date display
-- `calendar-view.tsx` — main orchestrator component, renders appropriate grid based on view mode
-- `week-view.tsx` — 7-column time grid with hourly rows, events positioned by time
-- `day-view.tsx` — single-column time grid
-- `month-view.tsx` — traditional month grid with event dots/pills
-- `event-card.tsx` — individual event rendering in the grid (gradient accent styling)
-- `event-form-modal.tsx` — modal for creating/editing events with title, description, date/time pickers, recurrence picker
-- `recurrence-picker.tsx` — dropdown for common recurrence patterns (daily, weekly, monthly, custom)
-
-**Implement** `frontend/src/app/(authenticated)/calendar/page.tsx`
-
-### 5.3: Todo View
-
-**Create** `frontend/src/components/todos/` directory:
-- `todo-list-card.tsx` — clickable card showing list title + item count badge; expands on click
-- `todo-item-row.tsx` — checkbox + text; CSS transitions for check animation (slide to bottom, opacity → 0.4)
-- `create-list-form.tsx` — inline form for new list creation
-- `add-item-form.tsx` — inline form at bottom of expanded list
-
-**Implement** `frontend/src/app/(authenticated)/todos/page.tsx`
-
-Completed item animation:
-```css
-.todo-item-completed {
-  opacity: 0.4;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-```
-Sort completed items to end in render logic.
-
----
-
-## Phase 6: Chat Sidebar & Gamification Stats
-
-**Objective**: Sliding chat panel and rolling bar charts.
-
-**Depends on**: Phase 3 (chat API), Phase 5 (frontend pages)
-
-### 6.1: Chat Sidebar
+### 5.2: Chat Sidebar
 
 **Create** `frontend/src/contexts/chat-context.tsx`:
 - `ChatProvider` managing: `isOpen`, `contextType`, `conversationId`
@@ -478,9 +476,11 @@ Sort completed items to end in render logic.
 
 **Modify** `frontend/src/app/providers.tsx` — wrap with `ChatProvider`
 
+**Modify** `frontend/src/components/layout/navbar.tsx` — enable "Chat with Plus+" button (was disabled in Phase 3), wire to chat context `open()`.
+
 **Integration**: Navbar "Chat with Plus+" button opens panel. Panel context-type determined by current route pathname.
 
-### 6.2: Gamification Stats
+### 5.3: Gamification Stats
 
 **Install** `recharts` in frontend.
 
@@ -494,13 +494,13 @@ Sort completed items to end in render logic.
 
 ---
 
-## Phase 7: Infrastructure, Docker & Final Testing
+## Phase 6: Infrastructure, Docker & Final Testing
 
 **Objective**: Update Docker config, environment files, and comprehensive test coverage.
 
 **Depends on**: All previous phases
 
-### 7.1: Docker & Environment
+### 6.1: Docker & Environment
 
 **Modify** `docker-compose.yml`:
 - Add new env vars to backend service (calendar/todo/conversation/message table names, Pinecone config)
@@ -508,15 +508,15 @@ Sort completed items to end in render logic.
 
 **Update** `backend/.env.example` and `frontend/.env.example` with documentation.
 
-### 7.2: Seed Script Finalization
+### 6.2: Seed Script Finalization
 
 Ensure `seed_data.py` creates all 7 tables (3 original + 4 new) with GSI on todos, and seeds sample data across all entity types.
 
-### 7.3: Backend Test Suite
+### 6.3: Backend Test Suite
 
-All new unit + integration tests from Phases 2.5 and 3.5. Target: maintain the pattern of comprehensive mocked tests.
+All new unit + integration tests from Phases 2.5 and 4.5. Target: maintain the pattern of comprehensive mocked tests.
 
-### 7.4: Frontend Build Verification
+### 6.4: Frontend Build Verification
 
 Ensure `npm run build` passes with all new components. This is the existing `make test-frontend` strategy.
 
@@ -528,8 +528,8 @@ Ensure `npm run build` passes with all new components. This is the existing `mak
 
 1. **`make build && make up`** — all containers start, all 7 DynamoDB tables created (with GSI on todos), seed data populated
 2. **Auth flow** — sign up, sign in, JWT works across all new endpoints
-3. **Calendar CRUD** — create event, list events by date range, update, delete. Verify RRULE expansion.
-4. **Todo CRUD** — create list, add items, toggle completion, delete. Verify item counts.
+3. **Calendar CRUD** — create event via UI, list events by date range, update, delete. Verify RRULE expansion.
+4. **Todo CRUD** — create list via UI, add items, toggle completion, delete. Verify item counts.
 5. **Chat flow** — send message in each context (pairs, calendar, todos), verify hybrid RAG retrieval (Pinecone Inference dense + sparse + FlashRank reranking), tool calls, persisted conversation
 6. **Stats** — verify rolling 10-day counts for pairs insertions and todo completions
 7. **Frontend navigation** — sidebar links work, top bar renders, pages load
