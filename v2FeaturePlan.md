@@ -227,16 +227,20 @@ Using a `(authenticated)` route group to share sidebar layout.
 ### 3.2: Sidebar Component
 
 **Create** `frontend/src/components/layout/sidebar.tsx`
-- Fixed left sidebar, 60px wide (w-60)
-- Logo at top ("Operate+")
-- Nav items: Pairs (Layers icon), Calendar (Calendar icon), Todos (CheckSquare icon)
+- Fixed left sidebar, narrow icon-only rail
+- 3 icon buttons (lucide-react), vertically stacked:
+  - **Pairs**: `Layers` icon — stacked layers convey paired data
+  - **Calendar**: `CalendarDays` icon — calendar grid with day numbers, immediately recognizable
+  - **Todos**: `ListChecks` icon — checklist with checkmarks, clearly communicates task management
 - Active state: accent-muted background + accent text
+- Tooltip on hover showing label ("Pairs", "Calendar", "Todos")
 - Matches glassmorphism aesthetic (backdrop-blur, subtle border)
+- No logo — logo stays on navbar
 
 ### 3.3: Top Bar Update
 
 **Modify** `frontend/src/components/layout/navbar.tsx`
-- Remove logo (moved to sidebar)
+- Logo remains as-is ("Operate+" gradient text, links to /pairs)
 - Keep: user first name, "Chat with Plus+" button (right side), theme toggle, sign out
 - "Chat with Plus+" button is visible but disabled until Phase 5 (chat sidebar)
 
