@@ -83,7 +83,7 @@ PINECONE_API_KEY=your-pinecone-api-key
 PINECONE_INDEX_NAME=deepthought-hybrid-rag
 ```
 
-### 1.4: DynamoDB Client Enhancements
+### 1.4: DynamoDB Client Enhancements [X]
 
 **Modify** `backend/src/deepthought/db/client.py` — add methods:
 - [X] `update_item(pk, sk, updates, return_values)` — partial attribute update via `UpdateExpression` with `SET` clauses
@@ -91,7 +91,7 @@ PINECONE_INDEX_NAME=deepthought-hybrid-rag
 - [X] `batch_delete(items: list[tuple[str, str]])` — batch delete via `BatchWriteItem` (for deleting a todo list + all its items; handles DynamoDB's 25-item batch limit internally)
 - [X] `query_between(pk, sk_start, sk_end)` — range query with `sk BETWEEN :start AND :end` for calendar date-range lookups
 - [X] `query_count(pk, sk_prefix)` — count query using `Select='COUNT'` for stats
-- `query_gsi(index_name, pk_attr, pk_value, sk_attr, sk_start, sk_end)` — GSI query for completed_at range on todos
+- [X] `query_gsi_range(index_name, pk_attr, pk_value, sk_attr, sk_start, sk_end)` — GSI range query for completed_at on todos
 
 ### 1.5: Dependency Injection
 

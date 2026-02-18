@@ -305,3 +305,53 @@ class DynamoDBClient:
                 return response.get("Count", 0)
         except ClientError as e:
             raise DatabaseError(f"Failed to query count: {e}") from e
+
+    async def query_gsi_range(
+        self,
+        index_name: str,
+        pk_attr: str,
+        pk_value: str,
+        sk_attr: str,
+        sk_start: str,
+        sk_end: str,
+    ) -> list[dict[str, Any]]:
+        """
+        Query a Global Secondary Index with a range condition on the GSI sort key.
+
+        Args:
+            index_name: Name of the GSI to query.
+            pk_attr: GSI partition key attribute name.
+            pk_value: GSI partition key value.
+            sk_attr: GSI sort key attribute name.
+            sk_start: Start of sort key range (inclusive).
+            sk_end: End of sort key range (inclusive).
+
+        Returns:
+            List of matching items.
+
+        Raises:
+            DatabaseError: If the operation fails.
+        """
+        try:
+            async with self._session.resource(
+                "dynamodb",
+                region_name=self.region,
+                endpoint_url=self.endpoint_url,
+            ) as dynamodb:
+                table = await dynamodb.Table(self.table_name)
+                response = await table.query(
+                    IndexName=index_name,
+                    KeyConditionExpression="#pk = :pk AND #sk BETWEEN :start AND :end",
+                    ExpressionAttributeNames={
+                        "#pk": pk_attr,
+                        "#sk": sk_attr,
+                    },
+                    ExpressionAttributeValues={
+                        ":pk": pk_value,
+                        ":start": sk_start,
+                        ":end": sk_end,
+                    },
+                )
+                return response.get("Items", [])
+        except ClientError as e:
+            raise DatabaseError(f"Failed to query GSI: {e}") from e
