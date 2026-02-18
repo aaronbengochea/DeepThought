@@ -58,7 +58,7 @@ Key architectural decisions:
 
 Follow existing patterns from `models/pairs.py` and `models/logs.py`: `BaseModel` with `Field(...)` descriptors, `int | float` unions, `datetime` types.
 
-### 1.3: Settings & Environment
+### 1.3: Settings & Environment [X]
 
 **Modify** `backend/src/deepthought/config/settings.py` — add fields:
 ```python
@@ -80,7 +80,7 @@ DYNAMODB_TODOS_TABLE=deepthought-todos
 DYNAMODB_CONVERSATIONS_TABLE=deepthought-conversations
 DYNAMODB_MESSAGES_TABLE=deepthought-messages
 PINECONE_API_KEY=your-pinecone-api-key
-PINECONE_INDEX_NAME=deepthought-rag
+PINECONE_INDEX_NAME=deepthought-hybrid-rag
 ```
 
 ### 1.4: DynamoDB Client Enhancements

@@ -37,14 +37,19 @@ class Settings(BaseSettings):
     dynamodb_users_table: str
     dynamodb_pairs_table: str
     dynamodb_logs_table: str
+    dynamodb_calendar_table: str
+    dynamodb_todos_table: str
+    dynamodb_conversations_table: str
+    dynamodb_messages_table: str
+
+     # Pinecone
+    pinecone_api_key: str
+    pinecone_index_name: str
 
     # JWT
     jwt_secret_key: str
     jwt_algorithm: str = "HS256"
     jwt_expiration_minutes: int = 1440
-
-    # Test Seed Data
-    test_user_password: str = ""
 
     # CORS
     cors_origins: list[str]
