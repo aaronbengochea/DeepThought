@@ -48,7 +48,7 @@ Key architectural decisions:
   - `pk` = conversation_id, `sk` = `{created_at}#{message_id}` (chronological ordering + message_id suffix for uniqueness when messages arrive at the same millisecond)
   - Attributes: `message_id`, `conversation_id`, `role` (`"user"` | `"assistant"`), `content`, `tool_calls` (list[dict] or null), `created_at`
 
-### 1.2: Pydantic Models
+### 1.2: Pydantic Models [X]
 
 **Create files:**
 - [X] `backend/src/deepthought/models/calendar.py` — `CalendarEvent`, `CalendarEventCreate`, `CalendarEventUpdate`, `CalendarEventResponse`
@@ -86,9 +86,9 @@ PINECONE_INDEX_NAME=deepthought-hybrid-rag
 ### 1.4: DynamoDB Client Enhancements
 
 **Modify** `backend/src/deepthought/db/client.py` — add methods:
-- `update_item(pk, sk, updates)` — partial attribute update via `UpdateExpression` with `SET` clauses
-- `delete_item(pk, sk)` — delete by composite key
-- `batch_delete(items: list[tuple[str, str]])` — batch delete via `BatchWriteItem` (for deleting a todo list + all its items; handles DynamoDB's 25-item batch limit internally)
+- [X] `update_item(pk, sk, updates, return_values)` — partial attribute update via `UpdateExpression` with `SET` clauses
+- [X] `delete_item(pk, sk)` — delete by primary key (pk + sk)
+- [X] `batch_delete(items: list[tuple[str, str]])` — batch delete via `BatchWriteItem` (for deleting a todo list + all its items; handles DynamoDB's 25-item batch limit internally)
 - `query_between(pk, sk_start, sk_end)` — range query with `sk BETWEEN :start AND :end` for calendar date-range lookups
 - `query_count(pk, sk_prefix)` — count query using `Select='COUNT'` for stats
 - `query_gsi(index_name, pk_attr, pk_value, sk_attr, sk_start, sk_end)` — GSI query for completed_at range on todos

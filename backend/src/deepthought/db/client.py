@@ -193,3 +193,36 @@ class DynamoDBClient:
                 await table.delete_item(Key={"pk": pk, "sk": sk})
         except ClientError as e:
             raise DatabaseError(f"Failed to delete item: {e}") from e
+
+    async def batch_delete(self, items: list[tuple[str, str]]) -> None:
+        """
+        Batch delete items by primary key (pk + sk).
+
+        Handles DynamoDB's 25-item batch limit internally by chunking.
+        Useful for deleting a todo list and all its items in one call.
+
+        Args:
+            items: List of (pk, sk) tuples to delete.
+
+        Raises:
+            DatabaseError: If the operation fails.
+        """
+        if not items:
+            return
+
+        try:
+            async with self._session.resource(
+                "dynamodb",
+                region_name=self.region,
+                endpoint_url=self.endpoint_url,
+            ) as dynamodb:
+                table = await dynamodb.Table(self.table_name)
+
+                # DynamoDB BatchWriteItem supports max 25 operations per call
+                for i in range(0, len(items), 25):
+                    chunk = items[i : i + 25]
+                    async with table.batch_writer() as batch:
+                        for pk, sk in chunk:
+                            await batch.delete_item(Key={"pk": pk, "sk": sk})
+        except ClientError as e:
+            raise DatabaseError(f"Failed to batch delete items: {e}") from e
