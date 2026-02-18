@@ -41,7 +41,7 @@ Four new tables (all composite key `pk` + `sk`):
 - `pk` = user_email for both entity types
 - **Todo lists**: `sk` = `LIST#{list_id}` — Attributes: `list_id`, `title`, `created_at`, `updated_at`
 - **Todo items**: `sk` = `ITEM#{list_id}#{item_id}` — Attributes: `item_id`, `list_id`, `text`, `completed` (bool), `completed_at` (ISO 8601 or null), `sort_order` (int), `created_at`, `updated_at`
-- **GSI**: `user_email_completed_at-index` — GSI pk=`user_email`, sk=`completed_at`. Only items with `completed_at` set are projected. Used for 10-day rolling stats query (`completed_at BETWEEN ...`).
+- **GSI**: `pk_completed_at_index` — GSI pk=`user_email`, sk=`completed_at`. Only items with `completed_at` set are projected. Used for 10-day rolling stats query (`completed_at BETWEEN ...`).
 - Benefits: co-located data for list+items reads, single DI client, efficient `begins_with(sk, 'ITEM#{list_id}')` queries
 
 **`deepthought-conversations`** (dedicated table — no sk prefix needed)
@@ -112,7 +112,7 @@ Following the exact `get_pairs_db_client()` pattern (4 new functions, not 5 — 
 
 **Modify** `backend/scripts/seed_data.py`:
 - Add `create_table()` calls for all 4 new tables (composite key)
-- Add GSI creation for `deepthought-todos` table (`user_email_completed_at-index`)
+- Add GSI creation for `deepthought-todos` table (`pk_completed_at_index`)
 - Add `seed_calendar()` — 3 sample events for test user (one recurring with rrule `FREQ=WEEKLY;BYDAY=MO,WE,FR`)
 - Add `seed_todos()` — 1 todo list with 3 items (1 completed with `completed_at` set)
 

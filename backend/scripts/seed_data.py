@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
-"""Seed test data into local DynamoDB."""
+"""Create DynamoDB tables for local development."""
 
 import os
-import uuid
-from datetime import datetime, timezone
 
-import bcrypt
 import boto3
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
@@ -50,52 +47,62 @@ def create_table(
             raise
 
 
-def seed_users(dynamodb_resource: boto3.resource) -> None:
-    """Seed a test user."""
-    table = dynamodb_resource.Table(os.environ["DYNAMODB_USERS_TABLE"])
+def create_table_with_gsi(
+    dynamodb_resource: boto3.resource,
+    table_name: str,
+    gsi_name: str,
+    gsi_pk_attr: str,
+    gsi_sk_attr: str,
+    gsi_sk_type: str = "S",
+) -> None:
+    """Create a DynamoDB table with a composite key (pk + sk) and a GSI.
 
-    password = os.environ["TEST_USER_PASSWORD"]
-    password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-
-    user = {
-        "pk": "test@example.com",
-        "first_name": "Test",
-        "last_name": "User",
-        "password_hash": password_hash,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    }
-
-    table.put_item(Item=user)
-    print(f"Seeded user: {user['pk']}")
-
-
-def seed_pairs(dynamodb_resource: boto3.resource) -> None:
-    """Seed two test pairs for the test user."""
-    table = dynamodb_resource.Table(os.environ["DYNAMODB_PAIRS_TABLE"])
-
-    pair_id_1 = str(uuid.uuid4())
-    pair_id_2 = str(uuid.uuid4())
-
-    pairs = [
-        {
-            "pk": "test@example.com",
-            "sk": pair_id_1,
-            "val1": 42,
-            "val2": 58,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        },
-        {
-            "pk": "test@example.com",
-            "sk": pair_id_2,
-            "val1": 100,
-            "val2": 200,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        },
+    Args:
+        dynamodb_resource: The boto3 DynamoDB resource.
+        table_name: The name of the table to create.
+        gsi_name: Name of the Global Secondary Index.
+        gsi_pk_attr: Partition key attribute name for the GSI.
+        gsi_sk_attr: Sort key attribute name for the GSI.
+        gsi_sk_type: DynamoDB type for the GSI sort key ("S", "N", or "B").
+    """
+    attribute_definitions = [
+        {"AttributeName": "pk", "AttributeType": "S"},
+        {"AttributeName": "sk", "AttributeType": "S"},
+        {"AttributeName": gsi_sk_attr, "AttributeType": gsi_sk_type},
     ]
 
-    for pair in pairs:
-        table.put_item(Item=pair)
-        print(f"Seeded pair: {pair['sk']} (val1={pair['val1']}, val2={pair['val2']})")
+    # Avoid duplicate attribute definitions if the GSI pk reuses an existing attr
+    gsi_pk_names = {ad["AttributeName"] for ad in attribute_definitions}
+    if gsi_pk_attr not in gsi_pk_names:
+        attribute_definitions.append({"AttributeName": gsi_pk_attr, "AttributeType": "S"})
+
+    try:
+        table = dynamodb_resource.create_table(
+            TableName=table_name,
+            KeySchema=[
+                {"AttributeName": "pk", "KeyType": "HASH"},
+                {"AttributeName": "sk", "KeyType": "RANGE"},
+            ],
+            AttributeDefinitions=attribute_definitions,
+            GlobalSecondaryIndexes=[
+                {
+                    "IndexName": gsi_name,
+                    "KeySchema": [
+                        {"AttributeName": gsi_pk_attr, "KeyType": "HASH"},
+                        {"AttributeName": gsi_sk_attr, "KeyType": "RANGE"},
+                    ],
+                    "Projection": {"ProjectionType": "ALL"},
+                },
+            ],
+            BillingMode="PAY_PER_REQUEST",
+        )
+        table.wait_until_exists()
+        print(f"Created table: {table_name} (with GSI: {gsi_name})")
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "ResourceInUseException":
+            print(f"Table already exists: {table_name}")
+        else:
+            raise
 
 
 def main() -> None:
@@ -119,6 +126,9 @@ def main() -> None:
     composite_key_tables = [
         os.environ["DYNAMODB_PAIRS_TABLE"],
         os.environ["DYNAMODB_LOGS_TABLE"],
+        os.environ["DYNAMODB_CALENDAR_TABLE"],
+        os.environ["DYNAMODB_CONVERSATIONS_TABLE"],
+        os.environ["DYNAMODB_MESSAGES_TABLE"],
     ]
     for table_name in composite_key_tables:
         create_table(dynamodb, table_name, has_sort_key=True)
@@ -126,9 +136,14 @@ def main() -> None:
     # Create users table with pk only (email is the partition key)
     create_table(dynamodb, os.environ["DYNAMODB_USERS_TABLE"], has_sort_key=False)
 
-    # Seed data
-    seed_users(dynamodb)
-    seed_pairs(dynamodb)
+    # Create todos table with GSI for completed_at stats queries
+    create_table_with_gsi(
+        dynamodb,
+        os.environ["DYNAMODB_TODOS_TABLE"],
+        gsi_name="pk_completed_at_index",
+        gsi_pk_attr="pk",
+        gsi_sk_attr="completed_at",
+    )
 
     print("Done!")
 
