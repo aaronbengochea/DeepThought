@@ -226,3 +226,42 @@ class DynamoDBClient:
                             await batch.delete_item(Key={"pk": pk, "sk": sk})
         except ClientError as e:
             raise DatabaseError(f"Failed to batch delete items: {e}") from e
+
+    async def query_between(
+        self,
+        pk: str,
+        sk_start: str,
+        sk_end: str,
+    ) -> list[dict[str, Any]]:
+        """
+        Range query with sk BETWEEN for date-range lookups.
+
+        Args:
+            pk: Partition key value.
+            sk_start: Start of sort key range (inclusive).
+            sk_end: End of sort key range (inclusive).
+
+        Returns:
+            List of matching items.
+
+        Raises:
+            DatabaseError: If the operation fails.
+        """
+        try:
+            async with self._session.resource(
+                "dynamodb",
+                region_name=self.region,
+                endpoint_url=self.endpoint_url,
+            ) as dynamodb:
+                table = await dynamodb.Table(self.table_name)
+                response = await table.query(
+                    KeyConditionExpression="pk = :pk AND sk BETWEEN :start AND :end",
+                    ExpressionAttributeValues={
+                        ":pk": pk,
+                        ":start": sk_start,
+                        ":end": sk_end,
+                    },
+                )
+                return response.get("Items", [])
+        except ClientError as e:
+            raise DatabaseError(f"Failed to query between: {e}") from e
