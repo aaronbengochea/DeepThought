@@ -28,35 +28,30 @@ Key architectural decisions:
 
 **Objective**: New DynamoDB tables, Pydantic models, Pinecone config, DynamoDB client enhancements, seed updates. No endpoints or UI.
 
-### 1.1: DynamoDB Table Schemas
+### 1.1: DynamoDB Table Schemas [X]
 
-Four new tables (all composite key `pk` + `sk`):
-
-**`deepthought-calendar`** (dedicated table — no sk prefix needed)
-- `pk` = user_email, `sk` = `{ISO_start_time}#{event_id}` (time-based sk for efficient range queries + event_id suffix for uniqueness when events share a start time)
-- Attributes: `event_id`, `title`, `description`, `start_time` (ISO 8601 w/ offset), `end_time` (ISO 8601 w/ offset), `rrule` (RFC 5545 string or null), `created_at`, `updated_at`
-- Range queries use `sk BETWEEN '2026-02-10' AND '2026-02-17'` for date-range lookups at the DB level
-
-**`deepthought-todos`** (single-table design — lists + items coexist, sk prefixes required to distinguish entity types)
-- `pk` = user_email for both entity types
-- **Todo lists**: `sk` = `LIST#{list_id}` — Attributes: `list_id`, `title`, `created_at`, `updated_at`
-- **Todo items**: `sk` = `ITEM#{list_id}#{item_id}` — Attributes: `item_id`, `list_id`, `text`, `completed` (bool), `completed_at` (ISO 8601 or null), `sort_order` (int), `created_at`, `updated_at`
-- **GSI**: `pk_completed_at_index` — GSI pk=`user_email`, sk=`completed_at`. Only items with `completed_at` set are projected. Used for 10-day rolling stats query (`completed_at BETWEEN ...`).
-- Benefits: co-located data for list+items reads, single DI client, efficient `begins_with(sk, 'ITEM#{list_id}')` queries
-
-**`deepthought-conversations`** (dedicated table — no sk prefix needed)
-- `pk` = user_email, `sk` = `{created_at}#{conversation_id}` (chronological ordering by default + conversation_id suffix for uniqueness)
-- Attributes: `conversation_id`, `context_type` (`"pairs"` | `"calendar"` | `"todos"` | `"general"`), `title`, `created_at`, `updated_at`
-- Conversations sort by `created_at` in DynamoDB results; for "most recent activity" ordering, sort by `updated_at` in application code (conversation counts per user are small)
-
-**`deepthought-messages`** (dedicated table — no sk prefix needed)
-- `pk` = conversation_id, `sk` = `{created_at}#{message_id}` (chronological ordering + message_id suffix for uniqueness when messages arrive at the same millisecond)
-- Attributes: `message_id`, `conversation_id`, `role` (`"user"` | `"assistant"`), `content`, `tool_calls` (list[dict] or null), `created_at`
+- [X] **`deepthought-calendar`** (dedicated table — no sk prefix needed)
+  - `pk` = user_email, `sk` = `{ISO_start_time}#{event_id}` (time-based sk for efficient range queries + event_id suffix for uniqueness when events share a start time)
+  - Attributes: `event_id`, `title`, `description`, `start_time` (ISO 8601 w/ offset), `end_time` (ISO 8601 w/ offset), `rrule` (RFC 5545 string or null), `created_at`, `updated_at`
+  - Range queries use `sk BETWEEN '2026-02-10' AND '2026-02-17'` for date-range lookups at the DB level
+- [X] **`deepthought-todos`** (single-table design — lists + items coexist, sk prefixes required to distinguish entity types)
+  - `pk` = user_email for both entity types
+  - **Todo lists**: `sk` = `LIST#{list_id}` — Attributes: `list_id`, `title`, `created_at`, `updated_at`
+  - **Todo items**: `sk` = `ITEM#{list_id}#{item_id}` — Attributes: `item_id`, `list_id`, `text`, `completed` (bool), `completed_at` (ISO 8601 or null), `sort_order` (int), `created_at`, `updated_at`
+  - **GSI**: `pk_completed_at_index` — GSI pk=`user_email`, sk=`completed_at`. Only items with `completed_at` set are projected. Used for 10-day rolling stats query (`completed_at BETWEEN ...`).
+  - Benefits: co-located data for list+items reads, single DI client, efficient `begins_with(sk, 'ITEM#{list_id}')` queries
+- [X] **`deepthought-conversations`** (dedicated table — no sk prefix needed)
+  - `pk` = user_email, `sk` = `{created_at}#{conversation_id}` (chronological ordering by default + conversation_id suffix for uniqueness)
+  - Attributes: `conversation_id`, `context_type` (`"pairs"` | `"calendar"` | `"todos"` | `"general"`), `title`, `created_at`, `updated_at`
+  - Conversations sort by `created_at` in DynamoDB results; for "most recent activity" ordering, sort by `updated_at` in application code (conversation counts per user are small)
+- [X] **`deepthought-messages`** (dedicated table — no sk prefix needed)
+  - `pk` = conversation_id, `sk` = `{created_at}#{message_id}` (chronological ordering + message_id suffix for uniqueness when messages arrive at the same millisecond)
+  - Attributes: `message_id`, `conversation_id`, `role` (`"user"` | `"assistant"`), `content`, `tool_calls` (list[dict] or null), `created_at`
 
 ### 1.2: Pydantic Models
 
 **Create files:**
-- `backend/src/deepthought/models/calendar.py` — `CalendarEvent`, `CalendarEventCreate`, `CalendarEventUpdate`, `CalendarEventResponse`
+- [X] `backend/src/deepthought/models/calendar.py` — `CalendarEvent`, `CalendarEventCreate`, `CalendarEventUpdate`, `CalendarEventResponse`
 - `backend/src/deepthought/models/todos.py` — `TodoList`, `TodoListCreate`, `TodoListResponse`, `TodoItem`, `TodoItemCreate`, `TodoItemUpdate`, `TodoItemResponse`
 - `backend/src/deepthought/models/chat.py` — `Conversation`, `ConversationCreate`, `ConversationResponse`, `ChatMessage`, `ChatMessageCreate`, `ChatMessageResponse`, `ChatRequest`, `ChatResponse`
 - `backend/src/deepthought/models/stats.py` — `DailyCount`, `StatsResponse`
