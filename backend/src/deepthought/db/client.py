@@ -6,6 +6,7 @@ import aioboto3
 from botocore.exceptions import ClientError
 
 from deepthought.core.exceptions import DatabaseError
+from deepthought.models.database import ReturnValues
 
 
 class DynamoDBClient:
@@ -118,3 +119,55 @@ class DynamoDBClient:
                 return response.get("Items", [])
         except ClientError as e:
             raise DatabaseError(f"Failed to query items: {e}") from e
+
+    async def update_item(
+        self,
+        pk: str,
+        sk: str,
+        updates: dict[str, Any],
+        return_values: ReturnValues = ReturnValues.ALL_NEW,
+    ) -> dict[str, Any]:
+        """
+        Partial attribute update via UpdateExpression with SET clauses.
+
+        Args:
+            pk: Partition key value.
+            sk: Sort key value.
+            updates: Dictionary of attribute names to new values.
+            return_values: What to return after the update (default ALL_NEW).
+
+        Returns:
+            The returned item attributes (depends on return_values).
+
+        Raises:
+            DatabaseError: If the operation fails.
+        """
+        try:
+            async with self._session.resource(
+                "dynamodb",
+                region_name=self.region,
+                endpoint_url=self.endpoint_url,
+            ) as dynamodb:
+                table = await dynamodb.Table(self.table_name)
+
+                set_parts: list[str] = []
+                expression_names: dict[str, str] = {}
+                expression_values: dict[str, Any] = {}
+
+                for i, (attr, value) in enumerate(updates.items()):
+                    placeholder_name = f"#attr{i}"
+                    placeholder_value = f":val{i}"
+                    set_parts.append(f"{placeholder_name} = {placeholder_value}")
+                    expression_names[placeholder_name] = attr
+                    expression_values[placeholder_value] = value
+
+                response = await table.update_item(
+                    Key={"pk": pk, "sk": sk},
+                    UpdateExpression="SET " + ", ".join(set_parts),
+                    ExpressionAttributeNames=expression_names,
+                    ExpressionAttributeValues=expression_values,
+                    ReturnValues=return_values,
+                )
+                return response.get("Attributes", {})
+        except ClientError as e:
+            raise DatabaseError(f"Failed to update item: {e}") from e

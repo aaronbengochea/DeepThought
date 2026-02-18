@@ -11,7 +11,7 @@ from deepthought.models.agents import (
     VerificationResult,
     VerificationStatus,
 )
-from deepthought.models.database import DynamoDBItem
+from deepthought.models.database import DynamoDBItem, ReturnValues
 from deepthought.models.logs import (
     AgentStepOutput,
     OperateRequest,
@@ -42,6 +42,7 @@ __all__ = [
     "FormattedResponse",
     # Database models
     "DynamoDBItem",
+    "ReturnValues",
     # User models
     "User",
     "UserCreate",
