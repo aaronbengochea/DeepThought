@@ -54,7 +54,7 @@ Key architectural decisions:
 - [X] `backend/src/deepthought/models/calendar.py` — `CalendarEvent`, `CalendarEventCreate`, `CalendarEventUpdate`, `CalendarEventResponse`
 - [X] `backend/src/deepthought/models/todos.py` — `TodoList`, `TodoListCreate`, `TodoListResponse`, `TodoItem`, `TodoItemCreate`, `TodoItemUpdate`, `TodoItemResponse`
 - [X] `backend/src/deepthought/models/chat.py` — `Conversation`, `ConversationCreate`, `ConversationResponse`, `ChatMessage`, `ChatMessageCreate`, `ChatMessageResponse`, `ChatRequest`, `ChatResponse`
-- `backend/src/deepthought/models/stats.py` — `DailyCount`, `StatsResponse`
+- [X] `backend/src/deepthought/models/stats.py` — `DailyCount`, `StatsResponse`
 
 Follow existing patterns from `models/pairs.py` and `models/logs.py`: `BaseModel` with `Field(...)` descriptors, `int | float` unions, `datetime` types.
 
