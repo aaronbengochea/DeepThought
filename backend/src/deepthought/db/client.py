@@ -171,3 +171,25 @@ class DynamoDBClient:
                 return response.get("Attributes", {})
         except ClientError as e:
             raise DatabaseError(f"Failed to update item: {e}") from e
+
+    async def delete_item(self, pk: str, sk: str) -> None:
+        """
+        Delete an item by composite key.
+
+        Args:
+            pk: Partition key value.
+            sk: Sort key value.
+
+        Raises:
+            DatabaseError: If the operation fails.
+        """
+        try:
+            async with self._session.resource(
+                "dynamodb",
+                region_name=self.region,
+                endpoint_url=self.endpoint_url,
+            ) as dynamodb:
+                table = await dynamodb.Table(self.table_name)
+                await table.delete_item(Key={"pk": pk, "sk": sk})
+        except ClientError as e:
+            raise DatabaseError(f"Failed to delete item: {e}") from e
