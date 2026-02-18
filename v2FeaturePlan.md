@@ -52,7 +52,7 @@ Key architectural decisions:
 
 **Create files:**
 - [X] `backend/src/deepthought/models/calendar.py` — `CalendarEvent`, `CalendarEventCreate`, `CalendarEventUpdate`, `CalendarEventResponse`
-- `backend/src/deepthought/models/todos.py` — `TodoList`, `TodoListCreate`, `TodoListResponse`, `TodoItem`, `TodoItemCreate`, `TodoItemUpdate`, `TodoItemResponse`
+- [X] `backend/src/deepthought/models/todos.py` — `TodoList`, `TodoListCreate`, `TodoListResponse`, `TodoItem`, `TodoItemCreate`, `TodoItemUpdate`, `TodoItemResponse`
 - `backend/src/deepthought/models/chat.py` — `Conversation`, `ConversationCreate`, `ConversationResponse`, `ChatMessage`, `ChatMessageCreate`, `ChatMessageResponse`, `ChatRequest`, `ChatResponse`
 - `backend/src/deepthought/models/stats.py` — `DailyCount`, `StatsResponse`
 
