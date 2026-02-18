@@ -265,3 +265,43 @@ class DynamoDBClient:
                 return response.get("Items", [])
         except ClientError as e:
             raise DatabaseError(f"Failed to query between: {e}") from e
+
+    async def query_count(self, pk: str, sk_prefix: str | None = None) -> int:
+        """
+        Count items by partition key with optional sort key prefix.
+
+        Uses Select='COUNT' to avoid transferring item data.
+
+        Args:
+            pk: Partition key value.
+            sk_prefix: Optional sort key prefix for begins_with condition.
+
+        Returns:
+            Number of matching items.
+
+        Raises:
+            DatabaseError: If the operation fails.
+        """
+        try:
+            async with self._session.resource(
+                "dynamodb",
+                region_name=self.region,
+                endpoint_url=self.endpoint_url,
+            ) as dynamodb:
+                table = await dynamodb.Table(self.table_name)
+
+                key_condition = "pk = :pk"
+                expression_values: dict[str, Any] = {":pk": pk}
+
+                if sk_prefix:
+                    key_condition += " AND begins_with(sk, :sk_prefix)"
+                    expression_values[":sk_prefix"] = sk_prefix
+
+                response = await table.query(
+                    KeyConditionExpression=key_condition,
+                    ExpressionAttributeValues=expression_values,
+                    Select="COUNT",
+                )
+                return response.get("Count", 0)
+        except ClientError as e:
+            raise DatabaseError(f"Failed to query count: {e}") from e
