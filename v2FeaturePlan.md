@@ -93,13 +93,13 @@ PINECONE_INDEX_NAME=deepthought-hybrid-rag
 - [X] `query_count(pk, sk_prefix)` — count query using `Select='COUNT'` for stats
 - [X] `query_gsi_range(index_name, pk_attr, pk_value, sk_attr, sk_start, sk_end)` — GSI range query for completed_at on todos
 
-### 1.5: Dependency Injection
+### 1.5: Dependency Injection [X]
 
 **Modify** `backend/src/deepthought/api/dependencies.py` — add DI functions:
 - [X] `get_calendar_db_client()` — for `deepthought-calendar` table
 - [X] `get_todos_db_client()` — for `deepthought-todos` table (single client for lists + items)
 - [X] `get_conversations_db_client()` — for `deepthought-conversations` table
-- `get_messages_db_client()` — for `deepthought-messages` table
+- [X] `get_messages_db_client()` — for `deepthought-messages` table
 
 Following the exact `get_pairs_db_client()` pattern (4 new functions, not 5 — todos is one table).
 
