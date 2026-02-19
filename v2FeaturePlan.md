@@ -96,8 +96,8 @@ PINECONE_INDEX_NAME=deepthought-hybrid-rag
 ### 1.5: Dependency Injection
 
 **Modify** `backend/src/deepthought/api/dependencies.py` — add DI functions:
-- `get_calendar_db_client()` — for `deepthought-calendar` table
-- `get_todos_db_client()` — for `deepthought-todos` table (single client for lists + items)
+- [X] `get_calendar_db_client()` — for `deepthought-calendar` table
+- [X] `get_todos_db_client()` — for `deepthought-todos` table (single client for lists + items)
 - `get_conversations_db_client()` — for `deepthought-conversations` table
 - `get_messages_db_client()` — for `deepthought-messages` table
 
