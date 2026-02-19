@@ -98,7 +98,7 @@ PINECONE_INDEX_NAME=deepthought-hybrid-rag
 **Modify** `backend/src/deepthought/api/dependencies.py` — add DI functions:
 - [X] `get_calendar_db_client()` — for `deepthought-calendar` table
 - [X] `get_todos_db_client()` — for `deepthought-todos` table (single client for lists + items)
-- `get_conversations_db_client()` — for `deepthought-conversations` table
+- [X] `get_conversations_db_client()` — for `deepthought-conversations` table
 - `get_messages_db_client()` — for `deepthought-messages` table
 
 Following the exact `get_pairs_db_client()` pattern (4 new functions, not 5 — todos is one table).
