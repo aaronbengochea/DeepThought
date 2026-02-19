@@ -47,3 +47,14 @@ def get_logs_db_client() -> Generator[DynamoDBClient, None, None]:
         endpoint_url=settings.dynamodb_endpoint_url,
     )
     yield client
+
+
+def get_calendar_db_client() -> Generator[DynamoDBClient, None, None]:
+    """Dependency to get DynamoDB client for the calendar table."""
+    settings = get_settings()
+    client = DynamoDBClient(
+        table_name=settings.dynamodb_calendar_table,
+        region=settings.aws_region,
+        endpoint_url=settings.dynamodb_endpoint_url,
+    )
+    yield client
