@@ -103,13 +103,13 @@ PINECONE_INDEX_NAME=deepthought-hybrid-rag
 
 Following the exact `get_pairs_db_client()` pattern (4 new functions, not 5 — todos is one table).
 
-### 1.6: Seed Script Update
+### 1.6: Seed Script Update [X]
 
 **Modify** `backend/scripts/seed_data.py`:
-- Add `create_table()` calls for all 4 new tables (composite key)
-- Add GSI creation for `deepthought-todos` table (`pk_completed_at_index`)
-- Add `seed_calendar()` — 3 sample events for test user (one recurring with rrule `FREQ=WEEKLY;BYDAY=MO,WE,FR`)
-- Add `seed_todos()` — 1 todo list with 3 items (1 completed with `completed_at` set)
+- [X] Add `create_table()` calls for all 4 new tables (composite key)
+- [X] Add GSI creation for `deepthought-todos` table (`pk_completed_at_index`)
+- [X] ~~Add `seed_calendar()` — 3 sample events for test user (one recurring with rrule `FREQ=WEEKLY;BYDAY=MO,WE,FR`)~~ (skipped — not seeding data)
+- [X] ~~Add `seed_todos()` — 1 todo list with 3 items (1 completed with `completed_at` set)~~ (skipped — not seeding data)
 
 ### 1.7: Pinecone Setup Script
 
