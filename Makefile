@@ -1,6 +1,6 @@
 COMPOSE = docker compose --env-file ./backend/.env --env-file ./frontend/.env
 
-.PHONY: up down build database seed \
+.PHONY: up down build database seed setup-pinecone \
         dev dev-backend dev-frontend \
         install install-backend install-frontend \
         test test-backend test-frontend \
@@ -36,6 +36,9 @@ database:
 seed: database
 	@sleep 2
 	$(COMPOSE) run --rm seed
+
+setup-pinecone:
+	$(COMPOSE) run --rm setup-pinecone
 
 # ---------------------------------------------------------------------------
 # Dependency installation

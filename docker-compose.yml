@@ -49,6 +49,16 @@ services:
     networks:
       - deepthought
 
+  setup-pinecone:
+    build:
+      context: ./backend
+    container_name: deepthought-setup-pinecone
+    command: ["python", "scripts/setup_pinecone.py"]
+    env_file:
+      - ./backend/.env
+    networks:
+      - deepthought
+
   backend:
     build:
       context: ./backend
