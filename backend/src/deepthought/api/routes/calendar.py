@@ -266,3 +266,24 @@ async def update_event(
         created_at=datetime.fromisoformat(item["created_at"]),
         updated_at=now,
     )
+
+
+@router.delete(
+    "/{event_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a calendar event",
+    description="Deletes a calendar event for the authenticated user.",
+)
+async def delete_event(
+    event_id: str,
+    current_user: dict[str, Any] = Depends(get_current_user),
+    calendar_db: DynamoDBClient = Depends(get_calendar_db_client),
+) -> None:
+    """Delete a calendar event.
+
+    1. Find the event by event_id (returns 404 if not found)
+    2. Delete using the composite key (pk=user_email, sk={start_time}#{event_id})
+    """
+    user_email = current_user["pk"]
+    item = await _find_event(calendar_db, user_email, event_id)
+    await calendar_db.delete_item(pk=user_email, sk=item["sk"])
