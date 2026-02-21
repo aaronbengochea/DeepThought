@@ -185,3 +185,84 @@ async def get_event(
     user_email = current_user["pk"]
     item = await _find_event(calendar_db, user_email, event_id)
     return _item_to_response(item)
+
+
+@router.patch(
+    "/{event_id}",
+    response_model=CalendarEventResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Update a calendar event",
+    description=(
+        "Partially updates a calendar event. If start_time changes, the item is "
+        "recreated with a new sort key (sk is {start_time}#{event_id})."
+    ),
+)
+async def update_event(
+    event_id: str,
+    request: CalendarEventUpdate,
+    current_user: dict[str, Any] = Depends(get_current_user),
+    calendar_db: DynamoDBClient = Depends(get_calendar_db_client),
+) -> CalendarEventResponse:
+    """Partially update a calendar event.
+
+    1. Find the event by event_id
+    2. If start_time changes: delete old item, insert new one (sk is time-based)
+    3. Otherwise: update_item with only the changed fields
+    """
+    user_email = current_user["pk"]
+    item = await _find_event(calendar_db, user_email, event_id)
+
+    old_sk: str = item["sk"]
+    now = datetime.now(timezone.utc)
+
+    new_title = request.title if request.title is not None else item["title"]
+    new_description = request.description if request.description is not None else item.get("description")
+    new_start = request.start_time if request.start_time is not None else datetime.fromisoformat(item["start_time"])
+    new_end = request.end_time if request.end_time is not None else datetime.fromisoformat(item["end_time"])
+    new_rrule = request.rrule if request.rrule is not None else item.get("rrule")
+
+    start_time_changed = (
+        request.start_time is not None
+        and request.start_time.isoformat() != item["start_time"]
+    )
+
+    if start_time_changed:
+        new_sk = f"{new_start.isoformat()}#{event_id}"
+        new_item: dict[str, Any] = {
+            "pk": user_email,
+            "sk": new_sk,
+            "event_id": event_id,
+            "title": new_title,
+            "start_time": new_start.isoformat(),
+            "end_time": new_end.isoformat(),
+            "created_at": item["created_at"],
+            "updated_at": now.isoformat(),
+        }
+        if new_description is not None:
+            new_item["description"] = new_description
+        if new_rrule is not None:
+            new_item["rrule"] = new_rrule
+        await calendar_db.delete_item(pk=user_email, sk=old_sk)
+        await calendar_db.put_item(new_item)
+    else:
+        updates: dict[str, Any] = {"updated_at": now.isoformat()}
+        if request.title is not None:
+            updates["title"] = new_title
+        if request.description is not None:
+            updates["description"] = new_description
+        if request.end_time is not None:
+            updates["end_time"] = new_end.isoformat()
+        if request.rrule is not None:
+            updates["rrule"] = new_rrule
+        await calendar_db.update_item(pk=user_email, sk=old_sk, updates=updates)
+
+    return CalendarEventResponse(
+        event_id=event_id,
+        title=new_title,
+        description=new_description,
+        start_time=new_start,
+        end_time=new_end,
+        rrule=new_rrule,
+        created_at=datetime.fromisoformat(item["created_at"]),
+        updated_at=now,
+    )
