@@ -17,6 +17,9 @@ dependencies = [
     "python-jose[cryptography]>=3.3.0",
     "email-validator>=2.0.0",
     "python-dotenv>=1.0.0",
+    "pinecone-client>=3.0.0",
+    "python-dateutil>=2.8.0",
+    "flashrank>=0.2.0",
 ]
 
 [project.optional-dependencies]
@@ -56,6 +59,8 @@ module = [
     "jose.*",
     "bcrypt.*",
     "dotenv.*",
+    "pinecone.*",
+    "flashrank.*",
 ]
 ignore_missing_imports = true
 

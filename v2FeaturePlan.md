@@ -111,29 +111,25 @@ Following the exact `get_pairs_db_client()` pattern (4 new functions, not 5 — 
 - [X] ~~Add `seed_calendar()` — 3 sample events for test user (one recurring with rrule `FREQ=WEEKLY;BYDAY=MO,WE,FR`)~~ (skipped — not seeding data)
 - [X] ~~Add `seed_todos()` — 1 todo list with 3 items (1 completed with `completed_at` set)~~ (skipped — not seeding data)
 
-### 1.7: Pinecone Setup Script
+### 1.7: Pinecone Setup Script [X]
 
 **Create** `backend/scripts/setup_pinecone.py`:
-- Creates the Pinecone index if it doesn't exist
-- Config: 1024 dimensions (`llama-text-embed-v2` default), **dotproduct** metric (required for hybrid search with sparse+dense)
-- Logs success/already-exists status
+- [X] Creates the Pinecone index if it doesn't exist
+- [X] Config: 1024 dimensions (`llama-text-embed-v2` default), **dotproduct** metric (required for hybrid search with sparse+dense); all config env-driven
+- [X] Logs success/already-exists status
 
-**Add** `make setup-pinecone` target to Makefile (separate from `make seed`).
+**Add** `make setup-pinecone` target to Makefile (separate from `make setup-dynamo`).
 
-### 1.8: Python Dependencies
+### 1.8: Python Dependencies [X]
 
 **Modify** `backend/pyproject.toml` — add to dependencies:
-```
-"pinecone-client>=3.0.0"
-"python-dateutil>=2.8.0"
-"flashrank>=0.2.0"
-```
+- [X] `pinecone-client>=3.0.0`
+- [X] `python-dateutil>=2.8.0`
+- [X] `flashrank>=0.2.0`
 
 Add to mypy overrides (ignore_missing_imports):
-```
-"pinecone.*"
-"flashrank.*"
-```
+- [X] `pinecone.*`
+- [X] `flashrank.*`
 
 Note: No `langchain-pinecone`, `langchain-google-genai`, or `pinecone-text` needed — Pinecone Inference handles both dense (`llama-text-embed-v2`) and sparse (`pinecone-sparse-english-v0`) embeddings natively via the `pinecone-client` SDK.
 
