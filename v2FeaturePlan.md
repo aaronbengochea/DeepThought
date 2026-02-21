@@ -141,16 +141,16 @@ Note: No `langchain-pinecone`, `langchain-google-genai`, or `pinecone-text` need
 
 **Depends on**: Phase 1
 
-### 2.1: Calendar Routes
+### 2.1: Calendar Routes [X]
 
 **Create** `backend/src/deepthought/api/routes/calendar.py`
 
 Endpoints:
-- `POST /api/v1/calendar/` — create event → `CalendarEventResponse` (201)
-- `GET /api/v1/calendar/?start=...&end=...` — list events in date range (expands RRULE instances within range using `python-dateutil`)
-- `GET /api/v1/calendar/{event_id}` — get single event
-- `PATCH /api/v1/calendar/{event_id}` — update event
-- `DELETE /api/v1/calendar/{event_id}` — delete event (204)
+- [X] `POST /api/v1/calendar/` — create event → `CalendarEventResponse` (201)
+- [X] `GET /api/v1/calendar/?start=...&end=...` — list events in date range (expands RRULE instances within range using `python-dateutil`)
+- [X] `GET /api/v1/calendar/{event_id}` — get single event
+- [X] `PATCH /api/v1/calendar/{event_id}` — update event
+- [X] `DELETE /api/v1/calendar/{event_id}` — delete event (204)
 
 All require JWT auth via `get_current_user`.
 
