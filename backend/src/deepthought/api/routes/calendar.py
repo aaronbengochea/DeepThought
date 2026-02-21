@@ -162,3 +162,26 @@ async def list_events(
 
     results.sort(key=lambda e: e.start_time)
     return results
+
+
+@router.get(
+    "/{event_id}",
+    response_model=CalendarEventResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get a calendar event",
+    description="Returns a single calendar event by ID for the authenticated user.",
+)
+async def get_event(
+    event_id: str,
+    current_user: dict[str, Any] = Depends(get_current_user),
+    calendar_db: DynamoDBClient = Depends(get_calendar_db_client),
+) -> CalendarEventResponse:
+    """Fetch a single calendar event by event_id.
+
+    Queries all events for the user and returns the one matching event_id.
+    The sk is {start_time}#{event_id}, so a full pk query is required to locate
+    an event by event_id alone.
+    """
+    user_email = current_user["pk"]
+    item = await _find_event(calendar_db, user_email, event_id)
+    return _item_to_response(item)
