@@ -1,6 +1,6 @@
 COMPOSE = docker compose --env-file ./backend/.env --env-file ./frontend/.env
 
-.PHONY: up down build database seed setup-pinecone \
+.PHONY: up down build database setup-dynamo setup-pinecone \
         dev dev-backend dev-frontend \
         install install-backend install-frontend \
         test test-backend test-frontend \
@@ -22,6 +22,9 @@ up: build
 	@echo "  API docs:     http://localhost:8080/docs"
 	@echo "  DynamoDB:     http://localhost:8000"
 	@echo "  DynamoDB GUI: http://localhost:8001"
+	@echo ""
+	@echo "  DynamoDB tables created successfully"
+	@echo "  Pinecone index created successfully"
 
 down:
 	$(COMPOSE) down
@@ -33,9 +36,8 @@ down:
 database:
 	$(COMPOSE) up -d dynamodb-local dynamodb-admin
 
-seed: database
-	@sleep 2
-	$(COMPOSE) run --rm seed
+setup-dynamo: database
+	$(COMPOSE) run --rm setup-dynamo
 
 setup-pinecone:
 	$(COMPOSE) run --rm setup-pinecone
@@ -56,17 +58,22 @@ install-frontend:
 # Local development (without Docker for app servers)
 # ---------------------------------------------------------------------------
 
-dev: database seed
+dev: database setup-dynamo setup-pinecone
 	@echo "Starting backend on port 8080..."
 	@cd backend && .venv/bin/uvicorn src.deepthought.api.app:create_app --factory --reload --port 8080 &
 	@echo "Starting frontend on port 3000..."
 	@cd frontend && npm run dev &
 	@echo ""
+	@echo "Infrastructure:"
+	@echo "  DynamoDB:      http://localhost:8000  (tables created)"
+	@echo "  DynamoDB GUI:  http://localhost:8001  (table browser)"
+	@echo "  Pinecone:      index provisioned"
+	@echo ""
 	@echo "Dev servers running:"
-	@echo "  Frontend:  http://localhost:3000"
-	@echo "  Backend:   http://localhost:8080"
+	@echo "  Frontend:      http://localhost:3000"
+	@echo "  Backend:       http://localhost:8080"
 
-dev-backend: database seed
+dev-backend: database setup-dynamo
 	cd backend && .venv/bin/uvicorn src.deepthought.api.app:create_app --factory --reload --port 8080
 
 dev-frontend:

@@ -45,7 +45,7 @@ DeepThought/
 │   ├── tests/
 │   │   ├── unit/            # Unit tests (209 tests)
 │   │   └── integration/     # API flow tests (25 tests)
-│   ├── scripts/             # DynamoDB seed script
+│   ├── scripts/             # DynamoDB and Pinecone setup scripts
 │   ├── documentation/       # Design docs
 │   ├── Dockerfile
 │   └── pyproject.toml
@@ -89,15 +89,15 @@ cp frontend/.env.example frontend/.env     # Set NEXT_PUBLIC_API_URL
 ### Run with Docker (Production-like)
 
 ```bash
-make up       # Build and start all services (frontend, backend, DynamoDB, seed)
+make up       # Build and start all services (frontend, backend, DynamoDB, setup-dynamo)
 make down     # Stop all services
 ```
 
 ### Run for Local Development
 
 ```bash
-make dev              # Start DynamoDB + seed + backend + frontend dev servers
-make dev-backend      # Backend only (with DynamoDB + seed)
+make dev              # Start DynamoDB + setup-dynamo + backend + frontend dev servers
+make dev-backend      # Backend only (with DynamoDB + setup-dynamo)
 make dev-frontend     # Frontend only
 ```
 
@@ -105,7 +105,7 @@ make dev-frontend     # Frontend only
 
 ```bash
 make database     # Start DynamoDB Local (port 8000) + Admin GUI (port 8001)
-make seed         # Seed test data (starts DynamoDB if needed)
+make setup-dynamo # Create DynamoDB tables (starts DynamoDB if needed)
 ```
 
 ## Service Endpoints

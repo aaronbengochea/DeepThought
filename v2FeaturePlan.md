@@ -105,7 +105,7 @@ Following the exact `get_pairs_db_client()` pattern (4 new functions, not 5 — 
 
 ### 1.6: Seed Script Update [X]
 
-**Modify** `backend/scripts/seed_data.py`:
+**Modify** `backend/scripts/setup_dynamodb.py`:
 - [X] Add `create_table()` calls for all 4 new tables (composite key)
 - [X] Add GSI creation for `deepthought-todos` table (`pk_completed_at_index`)
 - [X] ~~Add `seed_calendar()` — 3 sample events for test user (one recurring with rrule `FREQ=WEEKLY;BYDAY=MO,WE,FR`)~~ (skipped — not seeding data)
@@ -509,7 +509,7 @@ app.include_router(chat.router, prefix="/api/v1/chat", tags=["chat"])
 
 ### 6.2: Seed Script Finalization
 
-Ensure `seed_data.py` creates all 7 tables (3 original + 4 new) with GSI on todos, and seeds sample data across all entity types.
+Ensure `setup_dynamodb.py` creates all 7 tables (3 original + 4 new) with GSI on todos, and seeds sample data across all entity types.
 
 ### 6.3: Backend Test Suite
 
@@ -577,7 +577,7 @@ backend/src/deepthought/config/settings.py
 backend/src/deepthought/api/dependencies.py
 backend/src/deepthought/api/app.py
 backend/src/deepthought/db/client.py
-backend/scripts/seed_data.py
+backend/scripts/setup_dynamodb.py
 backend/pyproject.toml
 Makefile (add setup-pinecone target)
 ```

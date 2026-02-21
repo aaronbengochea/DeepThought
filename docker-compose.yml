@@ -34,11 +34,11 @@ services:
     networks:
       - deepthought
 
-  seed:
+  setup-dynamo:
     build:
       context: ./backend
-    container_name: deepthought-seed
-    command: ["python", "scripts/seed_data.py"]
+    container_name: deepthought-setup-dynamo
+    command: ["python", "scripts/setup_dynamodb.py"]
     env_file:
       - ./backend/.env
     environment:
@@ -70,7 +70,7 @@ services:
     environment:
       DYNAMODB_ENDPOINT_URL: ${DC_DYNAMODB_ENDPOINT}
     depends_on:
-      seed:
+      setup-dynamo:
         condition: service_completed_successfully
     networks:
       - deepthought
