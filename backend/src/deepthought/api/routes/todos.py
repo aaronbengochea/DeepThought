@@ -316,8 +316,12 @@ async def update_item(
         if request.completed is not None
         else existing.get("completed", False),
         completed_at=(
-            datetime.fromisoformat(updates["completed_at"])
-            if "completed_at" in updates and updates["completed_at"] is not None
+            (
+                datetime.fromisoformat(updates["completed_at"])
+                if updates["completed_at"] is not None
+                else None
+            )
+            if "completed_at" in updates
             else (
                 datetime.fromisoformat(existing["completed_at"])
                 if existing.get("completed_at")
