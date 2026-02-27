@@ -208,3 +208,51 @@ async def add_item(
         created_at=now,
         updated_at=now,
     )
+
+
+def _item_to_response(item: dict[str, Any]) -> TodoItemResponse:
+    """Map a raw DynamoDB item to a TodoItemResponse."""
+    completed_at_raw = item.get("completed_at")
+    return TodoItemResponse(
+        item_id=item["item_id"],
+        list_id=item["list_id"],
+        text=item["text"],
+        completed=item.get("completed", False),
+        completed_at=datetime.fromisoformat(completed_at_raw) if completed_at_raw else None,
+        sort_order=item.get("sort_order", 0),
+        created_at=datetime.fromisoformat(item["created_at"]),
+        updated_at=datetime.fromisoformat(item["updated_at"]),
+    )
+
+
+@router.get(
+    "/lists/{list_id}/items",
+    response_model=list[TodoItemResponse],
+    status_code=status.HTTP_200_OK,
+    summary="List items in a todo list",
+    description="Returns all items for a specific todo list, sorted by sort_order.",
+)
+async def list_items(
+    list_id: str,
+    current_user: dict[str, Any] = Depends(get_current_user),
+    todos_db: DynamoDBClient = Depends(get_todos_db_client),
+) -> list[TodoItemResponse]:
+    """List all items for a todo list.
+
+    1. Verify the parent list exists (404 if not)
+    2. Query all ITEM#{list_id}# entries
+    3. Return items sorted by sort_order ascending
+    """
+    user_email = current_user["pk"]
+
+    existing = await todos_db.get_item(pk=user_email, sk=f"LIST#{list_id}")
+    if existing is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Todo list not found",
+        )
+
+    items = await todos_db.query(pk=user_email, sk_prefix=f"ITEM#{list_id}#")
+    results = [_item_to_response(item) for item in items]
+    results.sort(key=lambda r: r.sort_order)
+    return results
