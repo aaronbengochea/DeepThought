@@ -328,3 +328,33 @@ async def update_item(
         created_at=datetime.fromisoformat(existing["created_at"]),
         updated_at=now,
     )
+
+
+@router.delete(
+    "/lists/{list_id}/items/{item_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a todo item",
+    description="Deletes a single item from a todo list.",
+)
+async def delete_item(
+    list_id: str,
+    item_id: str,
+    current_user: dict[str, Any] = Depends(get_current_user),
+    todos_db: DynamoDBClient = Depends(get_todos_db_client),
+) -> None:
+    """Delete a single todo item.
+
+    1. Verify the item exists (404 if not)
+    2. Delete by composite key (pk=user_email, sk=ITEM#{list_id}#{item_id})
+    """
+    user_email = current_user["pk"]
+    item_sk = f"ITEM#{list_id}#{item_id}"
+
+    existing = await todos_db.get_item(pk=user_email, sk=item_sk)
+    if existing is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Todo item not found",
+        )
+
+    await todos_db.delete_item(pk=user_email, sk=item_sk)
