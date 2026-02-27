@@ -154,18 +154,18 @@ Endpoints:
 
 All require JWT auth via `get_current_user`.
 
-### 2.2: Todo Routes
+### 2.2: Todo Routes [X]
 
 **Create** `backend/src/deepthought/api/routes/todos.py`
 
 Endpoints:
-- `POST /api/v1/todos/lists` — create todo list → `TodoListResponse` (201)
-- `GET /api/v1/todos/lists` — list all todo lists (with item/completed counts)
-- `DELETE /api/v1/todos/lists/{list_id}` — delete list + all items (204)
-- `POST /api/v1/todos/lists/{list_id}/items` — add item → `TodoItemResponse` (201)
-- `GET /api/v1/todos/lists/{list_id}/items` — list items for a list
-- `PATCH /api/v1/todos/lists/{list_id}/items/{item_id}` — update item (toggle complete, edit text)
-- `DELETE /api/v1/todos/lists/{list_id}/items/{item_id}` — delete item (204)
+- [X] `POST /api/v1/todos/lists` — create todo list → `TodoListResponse` (201)
+- [X] `GET /api/v1/todos/lists` — list all todo lists (with item/completed counts)
+- [X] `DELETE /api/v1/todos/lists/{list_id}` — delete list + all items (204)
+- [X] `POST /api/v1/todos/lists/{list_id}/items` — add item → `TodoItemResponse` (201)
+- [X] `GET /api/v1/todos/lists/{list_id}/items` — list items for a list
+- [X] `PATCH /api/v1/todos/lists/{list_id}/items/{item_id}` — update item (toggle complete, edit text)
+- [X] `DELETE /api/v1/todos/lists/{list_id}/items/{item_id}` — delete item (204)
 
 ### 2.3: Stats Routes
 
