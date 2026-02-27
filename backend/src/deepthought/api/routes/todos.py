@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from deepthought.api.auth import get_current_user
 from deepthought.api.dependencies import get_todos_db_client
@@ -110,3 +110,38 @@ async def list_lists(
 
     results.sort(key=lambda r: r.created_at)
     return results
+
+
+@router.delete(
+    "/lists/{list_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a todo list",
+    description="Deletes a todo list and all its items for the authenticated user.",
+)
+async def delete_list(
+    list_id: str,
+    current_user: dict[str, Any] = Depends(get_current_user),
+    todos_db: DynamoDBClient = Depends(get_todos_db_client),
+) -> None:
+    """Delete a todo list and all its items.
+
+    1. Verify the list exists (404 if not)
+    2. Query all ITEM#{list_id}# entries for the list
+    3. Batch delete the list entry + all item entries
+    """
+    user_email = current_user["pk"]
+
+    list_sk = f"LIST#{list_id}"
+    existing = await todos_db.get_item(pk=user_email, sk=list_sk)
+    if existing is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Todo list not found",
+        )
+
+    items = await todos_db.query(pk=user_email, sk_prefix=f"ITEM#{list_id}#")
+
+    to_delete: list[tuple[str, str]] = [(user_email, list_sk)]
+    to_delete.extend((user_email, item["sk"]) for item in items)
+
+    await todos_db.batch_delete(to_delete)
