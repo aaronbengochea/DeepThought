@@ -167,13 +167,13 @@ Endpoints:
 - [X] `PATCH /api/v1/todos/lists/{list_id}/items/{item_id}` — update item (toggle complete, edit text)
 - [X] `DELETE /api/v1/todos/lists/{list_id}/items/{item_id}` — delete item (204)
 
-### 2.3: Stats Routes
+### 2.3: Stats Routes [X]
 
 **Create** `backend/src/deepthought/api/routes/stats.py`
 
 Endpoints:
-- `GET /api/v1/stats/pairs` — total pairs + 10-day rolling daily insertion counts
-- `GET /api/v1/stats/todos` — total lists + 10-day rolling daily completed task counts
+- [X] `GET /api/v1/stats/pairs` — total pairs + 10-day rolling daily insertion counts
+- [X] `GET /api/v1/stats/todos` — total lists + 10-day rolling daily completed task counts
 
 ### 2.4: Route Registration
 
