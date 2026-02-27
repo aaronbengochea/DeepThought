@@ -184,13 +184,13 @@ app.include_router(todos.router, prefix="/api/v1/todos", tags=["todos"])
 app.include_router(stats.router, prefix="/api/v1/stats", tags=["stats"])
 ```
 
-### 2.5: Tests
+### 2.5: Tests [X]
 
-- `backend/tests/unit/test_calendar.py` — CRUD handlers with mocked DB
-- `backend/tests/unit/test_todos.py` — CRUD handlers with mocked DB
-- `backend/tests/unit/test_stats.py` — stats computation logic
-- `backend/tests/integration/test_calendar_flow.py` — full HTTP CRUD flow
-- `backend/tests/integration/test_todos_flow.py` — full HTTP CRUD flow
+- [X] `backend/tests/unit/test_calendar.py` — CRUD handlers with mocked DB
+- [X] `backend/tests/unit/test_todos.py` — CRUD handlers with mocked DB
+- [X] `backend/tests/unit/test_stats.py` — stats computation logic
+- [X] `backend/tests/integration/test_calendar_flow.py` — full HTTP CRUD flow
+- [X] `backend/tests/integration/test_todos_flow.py` — full HTTP CRUD flow
 
 ---
 
