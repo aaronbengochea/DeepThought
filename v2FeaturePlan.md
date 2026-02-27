@@ -175,7 +175,7 @@ Endpoints:
 - [X] `GET /api/v1/stats/pairs` — total pairs + 10-day rolling daily insertion counts
 - [X] `GET /api/v1/stats/todos` — total lists + 10-day rolling daily completed task counts
 
-### 2.4: Route Registration
+### 2.4: Route Registration [X]
 
 **Modify** `backend/src/deepthought/api/app.py` — register new routers:
 ```python
