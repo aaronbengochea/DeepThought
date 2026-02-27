@@ -12,6 +12,8 @@ from deepthought.db import DynamoDBClient
 from collections import defaultdict
 
 from deepthought.models.todos import (
+    TodoItemCreate,
+    TodoItemResponse,
     TodoListCreate,
     TodoListResponse,
 )
@@ -145,3 +147,64 @@ async def delete_list(
     to_delete.extend((user_email, item["sk"]) for item in items)
 
     await todos_db.batch_delete(to_delete)
+
+
+@router.post(
+    "/lists/{list_id}/items",
+    response_model=TodoItemResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Add a todo item",
+    description="Adds a new item to an existing todo list.",
+)
+async def add_item(
+    list_id: str,
+    request: TodoItemCreate,
+    current_user: dict[str, Any] = Depends(get_current_user),
+    todos_db: DynamoDBClient = Depends(get_todos_db_client),
+) -> TodoItemResponse:
+    """Add a new item to a todo list.
+
+    1. Verify the parent list exists (404 if not)
+    2. Count existing items to determine sort_order
+    3. Store with pk=user_email, sk=ITEM#{list_id}#{item_id}
+    4. Return the created item
+    """
+    user_email = current_user["pk"]
+
+    existing = await todos_db.get_item(pk=user_email, sk=f"LIST#{list_id}")
+    if existing is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Todo list not found",
+        )
+
+    existing_items = await todos_db.query(pk=user_email, sk_prefix=f"ITEM#{list_id}#")
+    sort_order = len(existing_items)
+
+    item_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc)
+
+    item: dict[str, Any] = {
+        "pk": user_email,
+        "sk": f"ITEM#{list_id}#{item_id}",
+        "item_id": item_id,
+        "list_id": list_id,
+        "text": request.text,
+        "completed": False,
+        "sort_order": sort_order,
+        "created_at": now.isoformat(),
+        "updated_at": now.isoformat(),
+    }
+
+    await todos_db.put_item(item)
+
+    return TodoItemResponse(
+        item_id=item_id,
+        list_id=list_id,
+        text=request.text,
+        completed=False,
+        completed_at=None,
+        sort_order=sort_order,
+        created_at=now,
+        updated_at=now,
+    )
