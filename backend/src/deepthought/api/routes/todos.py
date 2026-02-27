@@ -14,6 +14,7 @@ from collections import defaultdict
 from deepthought.models.todos import (
     TodoItemCreate,
     TodoItemResponse,
+    TodoItemUpdate,
     TodoListCreate,
     TodoListResponse,
 )
@@ -70,8 +71,7 @@ async def create_list(
     status_code=status.HTTP_200_OK,
     summary="List all todo lists",
     description=(
-        "Returns all todo lists for the authenticated user with item and "
-        "completed counts per list."
+        "Returns all todo lists for the authenticated user with item and completed counts per list."
     ),
 )
 async def list_lists(
@@ -256,3 +256,75 @@ async def list_items(
     results = [_item_to_response(item) for item in items]
     results.sort(key=lambda r: r.sort_order)
     return results
+
+
+@router.patch(
+    "/lists/{list_id}/items/{item_id}",
+    response_model=TodoItemResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Update a todo item",
+    description=(
+        "Partially updates a todo item. Supports changing text and toggling "
+        "completion status. When completed transitions to true, completed_at is "
+        "set automatically; when toggled back to false, completed_at is cleared."
+    ),
+)
+async def update_item(
+    list_id: str,
+    item_id: str,
+    request: TodoItemUpdate,
+    current_user: dict[str, Any] = Depends(get_current_user),
+    todos_db: DynamoDBClient = Depends(get_todos_db_client),
+) -> TodoItemResponse:
+    """Update a todo item.
+
+    1. Find the item by sk=ITEM#{list_id}#{item_id} (404 if not found)
+    2. Build update dict from non-None request fields
+    3. Handle completed toggle: set/clear completed_at accordingly
+    4. Apply partial update via update_item
+    """
+    user_email = current_user["pk"]
+    item_sk = f"ITEM#{list_id}#{item_id}"
+
+    existing = await todos_db.get_item(pk=user_email, sk=item_sk)
+    if existing is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Todo item not found",
+        )
+
+    now = datetime.now(timezone.utc)
+    updates: dict[str, Any] = {"updated_at": now.isoformat()}
+
+    if request.text is not None:
+        updates["text"] = request.text
+
+    if request.completed is not None:
+        updates["completed"] = request.completed
+        if request.completed and not existing.get("completed"):
+            updates["completed_at"] = now.isoformat()
+        elif not request.completed and existing.get("completed"):
+            updates["completed_at"] = None
+
+    await todos_db.update_item(pk=user_email, sk=item_sk, updates=updates)
+
+    return TodoItemResponse(
+        item_id=item_id,
+        list_id=list_id,
+        text=request.text if request.text is not None else existing["text"],
+        completed=request.completed
+        if request.completed is not None
+        else existing.get("completed", False),
+        completed_at=(
+            datetime.fromisoformat(updates["completed_at"])
+            if "completed_at" in updates and updates["completed_at"] is not None
+            else (
+                datetime.fromisoformat(existing["completed_at"])
+                if existing.get("completed_at")
+                else None
+            )
+        ),
+        sort_order=existing.get("sort_order", 0),
+        created_at=datetime.fromisoformat(existing["created_at"]),
+        updated_at=now,
+    )
