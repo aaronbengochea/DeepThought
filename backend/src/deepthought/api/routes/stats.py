@@ -7,7 +7,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, status
 
 from deepthought.api.auth import get_current_user
-from deepthought.api.dependencies import get_pairs_db_client
+from deepthought.api.dependencies import get_pairs_db_client, get_todos_db_client
 from deepthought.db import DynamoDBClient
 from deepthought.models.stats import DailyCount, StatsResponse
 
@@ -58,5 +58,50 @@ async def pairs_stats(
 
     return StatsResponse(
         total=len(pairs),
+        daily_counts=_build_daily_counts(dates),
+    )
+
+
+@router.get(
+    "/todos",
+    response_model=StatsResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Todos stats",
+    description="Returns total todo list count and 10-day rolling daily completed task counts.",
+)
+async def todos_stats(
+    current_user: dict[str, Any] = Depends(get_current_user),
+    todos_db: DynamoDBClient = Depends(get_todos_db_client),
+) -> StatsResponse:
+    """Get todos stats: total list count + 10-day rolling daily completions.
+
+    1. Count total lists via query_count with sk_prefix=LIST#
+    2. Query the completed_at GSI for items completed in the last 10 days
+    3. Aggregate completed_at dates into daily counts
+    """
+    user_email = current_user["pk"]
+
+    total_lists = await todos_db.query_count(pk=user_email, sk_prefix="LIST#")
+
+    today = datetime.now(timezone.utc).date()
+    start_date = today - timedelta(days=9)
+    sk_start = f"{start_date.isoformat()}T00:00:00+00:00"
+    sk_end = f"{today.isoformat()}T23:59:59+00:00"
+
+    completed_items = await todos_db.query_gsi_range(
+        index_name="pk_completed_at_index",
+        pk_attr="pk",
+        pk_value=user_email,
+        sk_attr="completed_at",
+        sk_start=sk_start,
+        sk_end=sk_end,
+    )
+
+    dates = [
+        datetime.fromisoformat(item["completed_at"]).date().isoformat() for item in completed_items
+    ]
+
+    return StatsResponse(
+        total=total_lists,
         daily_counts=_build_daily_counts(dates),
     )
